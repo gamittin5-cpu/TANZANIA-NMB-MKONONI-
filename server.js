@@ -364,8 +364,8 @@ app.post('/api/submit-application', async (req, res) => {
     }
 
     const cleanContact = String(contact || '').replace(/\D/g, '');
-    if (!/^\d{10}$/.test(cleanContact)) {
-      return res.status(400).json({ success: false, error: 'Namba ya NMB Mkononi lazima iwe na tarakimu 10 halisi.' });
+    if (!/^0\d{9}$/.test(cleanContact)) {
+      return res.status(400).json({ success: false, error: 'Namba ya NMB Mkononi lazima iwe na tarakimu 10 na kuanza na 0.' });
     }
 
     const targetChat = resolveTargetChat(adminChatId);
@@ -472,4 +472,4 @@ app.listen(PORT, async () => {
   console.log(`[Server] Running smoothly on port ${PORT}`);
   await initBot();
 });
-      
+    
