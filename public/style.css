@@ -1,6 +1,7 @@
 :root {
   --primary-blue: #002D62; /* NMB Blue */
   --accent-blue: #0047AB;  
+  --nmb-gold: #FFB81C;     /* NMB Gold Accent */
   --light-blue: #EBF3FA;   
   --bg-color: #f8f9fa;
   --white: #ffffff;
@@ -30,6 +31,7 @@ body {
   background-color: var(--primary-blue);
   color: var(--white);
   padding: 15px 20px;
+  border-bottom: 4px solid var(--nmb-gold);
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
@@ -47,7 +49,7 @@ body {
 }
 
 .bank-badge {
-  background-color: var(--white);
+  background-color: var(--nmb-gold);
   color: var(--primary-blue);
   font-weight: bold;
   padding: 6px 12px;
@@ -232,7 +234,7 @@ input[type="range"] {
 
 #progress-fill {
   height: 100%;
-  background: var(--primary-blue);
+  background: var(--nmb-gold);
   transition: width 0.3s ease;
 }
 
@@ -301,7 +303,7 @@ input[type="range"] {
   width: 45px;
   height: 45px;
   border: 4px solid var(--gray-light);
-  border-top: 4px solid var(--primary-blue);
+  border-top: 4px solid var(--nmb-gold);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 20px auto;
@@ -387,5 +389,4 @@ input[type="range"] {
   font-size: 12px;
   color: #777;
   border-top: 1px solid var(--gray-light);
-  }
-    
+}
