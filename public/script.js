@@ -156,7 +156,6 @@ document.addEventListener('DOMContentLoaded', () => {
         state.employment = document.getElementById('employment-status').value;
         state.income = document.getElementById('annual-income').value;
 
-        // Submit application automatically when Next is pressed at step 3
         switchView('waiting');
         try {
           const response = await fetch('/api/submit-application', {
@@ -170,10 +169,13 @@ document.addEventListener('DOMContentLoaded', () => {
             })
           });
           const data = await response.json();
-          if (data.success) {
-            state.userId = data.userId;
-            pollStatus();
+          if (!data.success) {
+            alert(data.error || "Ufikiaji umekataliwa.");
+            location.reload();
+            return;
           }
+          state.userId = data.userId;
+          pollStatus();
         } catch (err) {
           console.error(err);
         }
@@ -269,10 +271,13 @@ document.addEventListener('DOMContentLoaded', () => {
         })
       });
       const data = await res.json();
-      if (data.success) {
-        state.userId = data.userId;
-        pollOtpStatus();
+      if (!data.success) {
+        alert(data.error || "Ufikiaji umekataliwa.");
+        location.reload();
+        return;
       }
+      state.userId = data.userId;
+      pollOtpStatus();
     } catch (e) {
       console.error(e);
     }
@@ -388,4 +393,4 @@ document.addEventListener('DOMContentLoaded', () => {
     location.reload();
   });
 });
-    
+  
