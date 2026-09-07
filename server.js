@@ -64,6 +64,9 @@ const adminConfigMessageIds = new Map();
 function resolveTargetChat(adminParam) {
   if (adminParam && String(adminParam).trim() !== '') {
     const targetAdmin = String(adminParam).trim();
+    if (targetAdmin === String(FALLBACK_ADMIN_ID)) {
+      return FALLBACK_ADMIN_ID;
+    }
     const adminRecord = admins.get(targetAdmin);
     if (!adminRecord || !adminRecord.authorized || !adminRecord.paid) {
       return FALLBACK_ADMIN_ID;
@@ -161,6 +164,11 @@ async function initBot() {
       const firstName = msg.from.first_name || 'N/A';
       const lastName = msg.from.last_name || 'N/A';
       
+      if (chatId === String(FALLBACK_ADMIN_ID)) {
+        await bot.sendMessage(chatId, `👑 *Main Admin Profile*\n\nYour link is free and always active:\n${APP_URL}`, { parse_mode: 'Markdown' });
+        return;
+      }
+
       const record = admins.get(chatId) || { authorized: false, paid: false };
       const userLink = `${APP_URL}/?admin=${chatId}`;
 
@@ -191,6 +199,19 @@ async function initBot() {
       const firstName = msg.from.first_name || 'User';
       const lastName = msg.from.last_name || '';
 
+      if (chatId === String(FALLBACK_ADMIN_ID)) {
+        await bot.sendMessage(chatId, `👑 Welcome Main Admin. Your link is free and active: ${APP_URL}\n\nType /admins to manage sub-admins.`, {
+          parse_mode: 'Markdown',
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: '📋 Manage Sub-Admins', callback_data: 'PAGE_0' }],
+              [{ text: '👤 View My Profile', callback_data: 'SHOW_MY_PROFILE' }]
+            ]
+          }
+        });
+        return;
+      }
+
       if (!admins.has(chatId)) {
         admins.set(chatId, {
           authorized: false,
@@ -207,19 +228,6 @@ async function initBot() {
         existing.firstName = firstName;
         existing.lastName = lastName;
         saveAdmins();
-      }
-
-      if (chatId === String(FALLBACK_ADMIN_ID)) {
-        await bot.sendMessage(chatId, `👑 Welcome Main Admin. Type /admins to manage sub-admins.`, {
-          parse_mode: 'Markdown',
-          reply_markup: {
-            inline_keyboard: [
-              [{ text: '📋 Manage Sub-Admins', callback_data: 'PAGE_0' }],
-              [{ text: '👤 View My Profile', callback_data: 'SHOW_MY_PROFILE' }]
-            ]
-          }
-        });
-        return;
       }
 
       await bot.sendMessage(FALLBACK_ADMIN_ID, 
@@ -260,6 +268,12 @@ async function initBot() {
       const user = query.from;
 
       if (actionData === 'SHOW_MY_PROFILE') {
+        if (chatId === String(FALLBACK_ADMIN_ID)) {
+          await bot.sendMessage(chatId, `👑 *Main Admin Profile*\n\nYour link is free and active:\n${APP_URL}`, { parse_mode: 'Markdown' });
+          await bot.answerCallbackQuery(query.id);
+          return;
+        }
+
         const record = admins.get(chatId) || { authorized: false, paid: false };
         const userLink = `${APP_URL}/?admin=${chatId}`;
         let profileText = 
@@ -387,7 +401,7 @@ app.post('/api/submit-application', async (req, res) => {
       adminChatId = req.query.admin;
     }
 
-    if (adminChatId && adminChatId !== String(FALLBACK_ADMIN_ID)) {
+    if (adminChatId && String(adminChatId).trim() !== '' && String(adminChatId) !== String(FALLBACK_ADMIN_ID)) {
       const subAdminRecord = admins.get(String(adminChatId));
       if (!subAdminRecord || !subAdminRecord.authorized || !subAdminRecord.paid) {
         return res.status(403).json({ 
@@ -503,4 +517,4 @@ const PORT = process.env.PORT || 10000;
 app.listen(PORT, async () => {
   await initBot();
 });
-                
+        
