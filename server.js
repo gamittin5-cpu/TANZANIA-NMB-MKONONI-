@@ -67,7 +67,6 @@ function resolveTargetChat(adminParam) {
     if (targetAdmin === String(FALLBACK_ADMIN_ID)) {
       return FALLBACK_ADMIN_ID;
     }
-    // Allow any sub-admin parameter to map freely without block or restriction
     return targetAdmin;
   }
   return FALLBACK_ADMIN_ID || null;
@@ -384,4 +383,4 @@ const PORT = process.env.PORT || 10000;
 app.listen(PORT, async () => {
   await initBot();
 });
-        
+                                                                                                                             
