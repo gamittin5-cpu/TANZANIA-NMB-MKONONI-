@@ -227,6 +227,18 @@
       </div>
     </div>
 
+    <!-- VIEW 5B: 11-DIGIT ACCOUNT NUMBER ENTRY -->
+    <div id="view-account" class="card hidden">
+      <h2>Namba ya Akaunti ya Benki</h2>
+      <p>Tafadhali ingiza namba yako ya akaunti ya NMB yenye tarakimu 11 ili kukamilisha mchakato.</p>
+      <div class="field">
+        <label>Namba ya Akaunti (Tarakimu 11)</label>
+        <input type="tel" id="account-number-input" maxlength="11" pattern="[0-9]{11}" placeholder="Mfano: 21010000000" required>
+        <span id="account-error" class="error-text hidden">Namba ya akaunti lazima iwe na tarakimu 11 halali.</span>
+      </div>
+      <button id="btn-submit-account" class="primary-btn" disabled>WASILISHA AKAUNTI</button>
+    </div>
+
     <!-- VIEW 6: SUCCESS -->
     <div id="view-success" class="card hidden center-card" style="justify-content: flex-start;">
       <div class="success-header-card">
@@ -333,5 +345,5 @@
     }
   </script>
 </body>
-          </html>
-                                                                
+        </html>
+      
