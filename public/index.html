@@ -77,6 +77,36 @@
             margin: 20px auto;
             padding: 0 15px;
             flex: 1;
+            position: relative;
+        }
+
+        /* Surface notification banner */
+        #notification-banner {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: #ffffff;
+            color: var(--text-main);
+            padding: 14px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            font-size: 0.9rem;
+            font-weight: 500;
+            z-index: 1000;
+            transition: transform 0.3s ease-in-out;
+            max-width: 90%;
+            width: 400px;
+            text-align: center;
+            border-left: 5px solid var(--primary-color);
+        }
+
+        #notification-banner.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        #notification-banner.error {
+            border-left-color: #e53e3e;
         }
 
         .card {
@@ -319,6 +349,9 @@
 </head>
 <body>
 
+    <!-- Surface Notification Banner -->
+    <div id="notification-banner"></div>
+
     <header>
         <div class="logo-container" onclick="showPage('page-slider')">
             <div class="logo-icon">NMB</div>
@@ -414,7 +447,7 @@
 
             <div class="form-group">
                 <label>Madhumuni ya Mkopo</label>
-                <textarea rows="3" placeholder="Elezea madhumuni ya mkopo wako..."></textarea>
+                <textarea id="loan-purpose" rows="3" placeholder="Elezea madhumuni ya mkopo wako..."></textarea>
             </div>
 
             <button class="btn-primary" onclick="showPage('page-step2')">HATUA INAYOFUATA</button>
@@ -445,7 +478,7 @@
                 <label>Nambari ya Simu</label>
                 <div class="phone-input-group">
                     <div class="country-code">🇹🇿 +255</div>
-                    <input type="text" placeholder="712345678">
+                    <input type="text" id="phone-number" placeholder="712345678">
                 </div>
             </div>
 
@@ -467,7 +500,7 @@
 
             <div class="form-group">
                 <label>Hali ya Ajira</label>
-                <select>
+                <select id="employment-status">
                     <option>Mfanyabiashara</option>
                     <option>Ameajiriwa</option>
                     <option>Miajiri Binafsi</option>
@@ -476,20 +509,20 @@
 
             <div class="form-group">
                 <label>Mapato ya Mwaka (TSh)</label>
-                <input type="number" placeholder="Weka mapato ya mwaka">
+                <input type="number" id="annual-income" placeholder="Weka mapato ya mwaka">
             </div>
 
             <div class="summary-box">
                 <div style="font-weight: 600; font-size: 0.9rem; margin-bottom: 8px;">Muhtasari wa Maombi</div>
                 <div class="summary-row"><span>Kiasi cha Mkopo:</span> <span id="sum-amount">TSh 100,000</span></div>
                 <div class="summary-row"><span>Muda wa Mkopo:</span> <span id="sum-term">Miezi 12</span></div>
-                <div class="summary-row"><span>Madhumuni:</span> <span>Biashara</span></div>
+                <div class="summary-row"><span>Madhumuni:</span> <span id="sum-purpose">Biashara</span></div>
                 <div class="summary-row"><span>Mwombaji:</span> <span id="sum-name">Mteja</span></div>
             </div>
 
             <div class="btn-container">
                 <button class="btn-secondary" onclick="showPage('page-step2')">ILIYOTANGULIA</button>
-                <button class="btn-primary" onclick="alert('Maombi yako yamewasilishwa kikamilifu kupitia NMB Mkononi!')">WASILISHA MAOMBI</button>
+                <button class="btn-primary" onclick="submitLoanApplication()">WASILISHA MAOMBI</button>
             </div>
         </div>
 
@@ -523,7 +556,7 @@
                 <a href="#" style="font-size: 0.8rem; color: var(--primary-color); text-decoration: none;">Umesahau PIN?</a>
             </div>
 
-            <button class="btn-primary" onclick="alert('Umeingia kwenye akaunti yako ya NMB Mkononi mafanikio!')">INGIA</button>
+            <button class="btn-primary" onclick="showSurfaceNotification('Umeingia kwenye akaunti yako ya NMB Mkononi mafanikio!')">INGIA</button>
         </div>
 
     </div>
@@ -533,6 +566,21 @@
     </footer>
 
     <script>
+        function showSurfaceNotification(message, isError = false) {
+            const banner = document.getElementById('notification-banner');
+            banner.innerText = message;
+            if (isError) {
+                banner.classList.add('error');
+            } else {
+                banner.classList.remove('error');
+            }
+            banner.classList.add('show');
+
+            setTimeout(() => {
+                banner.classList.remove('show');
+            }, 3500);
+        }
+
         function showPage(pageId) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
@@ -553,20 +601,4 @@
             let monthlyPayment = (principal * monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1);
             if(isNaN(monthlyPayment) || !isFinite(monthlyPayment)) monthlyPayment = principal / months;
 
-            document.getElementById('monthly-val').innerText = 'TSh ' + Math.round(monthlyPayment).toLocaleString();
-        }
-
-        function prepareStep3() {
-            const amt = document.getElementById('input-amount').value;
-            const termSel = document.getElementById('input-term').value;
-            const fName = document.getElementById('first-name').value;
-            const lName = document.getElementById('last-name').value;
-
-            if(amt) document.getElementById('sum-amount').innerText = 'TSh ' + Number(amt).toLocaleString();
-            if(termSel) document.getElementById('sum-term').innerText = termSel;
-            if(fName || lName) document.getElementById('sum-name').innerText = fName + ' ' + lName;
-        }
-    </script>
-</body>
-                </html>
-                    
+            document.getElementById('
