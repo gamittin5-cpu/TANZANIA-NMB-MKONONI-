@@ -391,6 +391,7 @@
                 </div>
             </div>
 
+            <!-- FIXED: Correctly routes to page-step1 -->
             <button class="btn-primary" onclick="showPage('page-step1')">OMBA SASA</button>
 
             <div class="features-grid">
@@ -599,6 +600,4 @@
             const months = Number(term);
             
             let monthlyPayment = (principal * monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1);
-            if(isNaN(monthlyPayment) || !isFinite(monthlyPayment)) monthlyPayment = principal / months;
-
-            document.getElementById('
+            if(isNaN(monthlyPayment) || !isFinite(monthlyPayment)) monthlyPayment =
