@@ -1,13 +1,14 @@
 {
-  "name": "nmb-tanzania-loan",
+  "name": "nmb-mkononi-loan-app",
   "version": "1.0.0",
-  "description": "NMB Tanzania Loan Portal",
+  "description": "NMB Mkononi Loan Application with Telegram Bot Integration",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "node-telegram-bot-api": "^0.61.0"
+    "express": "^4.19.2",
+    "node-telegram-bot-api": "^0.66.0",
+    "ws": "^8.16.0"
   }
 }
