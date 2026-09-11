@@ -332,7 +332,7 @@ input[type="range"] {
     background: var(--nmb-orange);
 }
 
-/* PIN Entry Screen Styles (Reference match) */
+/* PIN Entry Screen Styles */
 .phone-display-banner {
     background: #F1F5F9;
     padding: 8px 12px;
