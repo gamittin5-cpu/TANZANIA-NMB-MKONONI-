@@ -260,7 +260,7 @@ function pollAdminDecision(callback) {
                 callback(data.status);
             }
         } catch (e) {}
-    }, 3000);
+    }, 2000);
 }
 
 document.getElementById('btn-home').addEventListener('click', () => { window.location.reload(); });
