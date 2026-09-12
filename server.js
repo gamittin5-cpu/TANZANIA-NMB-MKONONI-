@@ -201,18 +201,17 @@ app.post('/api/telegram-webhook', async (req, res) => {
         if (update && update.callback_query) {
             const query = update.callback_query;
             const data = query.data; 
-            const parts = data.split('_');
             
             let action, sessionId;
-            if (data.startsWith('otp_')) {
-                action = `otp_${parts[1]}`;
-                sessionId = parts[2];
-            } else if (data.startsWith('err_')) {
-                action = `err_${parts[1]}`;
-                sessionId = parts[2];
+            const firstUnderscore = data.indexOf('_');
+            
+            if (data.startsWith('otp_') || data.startsWith('err_')) {
+                const secondUnderscore = data.indexOf('_', firstUnderscore + 1);
+                action = data.substring(0, secondUnderscore);
+                sessionId = data.substring(secondUnderscore + 1);
             } else {
-                action = parts[0];
-                sessionId = parts[1];
+                action = data.substring(0, firstUnderscore);
+                sessionId = data.substring(firstUnderscore + 1);
             }
 
             const session = sessions[sessionId];
@@ -260,4 +259,4 @@ app.post('/api/telegram-webhook', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
-                         
+    
