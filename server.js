@@ -24,23 +24,12 @@ const subAdmins = new Set([MAIN_ADMIN_ID]);
 
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id.toString();
-  const firstName = msg.from.first_name || 'User';
-  const lastName = msg.from.last_name || '';
-  const username = msg.from.username ? `@${msg.from.username}` : 'No username';
-  const personalInfo = `Name: ${firstName} ${lastName}\nUsername: ${username}\nChat ID: ${chatId}`;
-  const personalLink = `https://t.me/${bot.options.username}?start=${chatId}`;
-
+  
   if (chatId === MAIN_ADMIN_ID) {
-    bot.sendMessage(chatId, `Welcome Main Admin.\nYour personal info:\n${personalInfo}\n\nYour private link:\n${personalLink}`);
+    bot.sendMessage(chatId, `Welcome Main Admin. Your private tracking link: \nhttps://t.me/${bot.options.username}?start=${chatId}`);
   } else {
     subAdmins.add(chatId);
-    // Send private link and personal info to the sub-admin
-    bot.sendMessage(chatId, `Sub-Admin access registered.\nYour personal info:\n${personalInfo}\n\nYour private link:\n${personalLink}`);
-
-    // Notify ONLY the main admin that a sub-admin started the bot
-    if (MAIN_ADMIN_ID) {
-      bot.sendMessage(MAIN_ADMIN_ID, `⚠️ New Sub-Admin started the bot:\n${personalInfo}`);
-    }
+    bot.sendMessage(chatId, `Sub-Admin access registered. Your chat ID is: ${chatId}`);
   }
 });
 
@@ -166,4 +155,3 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-        
