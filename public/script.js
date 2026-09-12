@@ -373,4 +373,4 @@ document.getElementById('btn-home').addEventListener('click', () => {
 });
 
 updateCalculator();
-        
+    
